@@ -1,0 +1,682 @@
+﻿@using CourseWork.Models
+@using System.Linq
+@model CourseWork.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "База даних магазину";
+}
+
+<div class="container">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm mt-3" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm mt-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <h2 class="my-4"><i class="bi bi-database-gear"></i> Керування даними</h2>
+
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="brand-tab" data-bs-toggle="tab" data-bs-target="#tabBrands" type="button" role="tab" aria-controls="brands" aria-selected="true">
+                <i class="bi bi-award"></i> Бренди
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="product-tab" data-bs-toggle="tab" data-bs-target="#tabProducts" type="button" role="tab" aria-controls="products" aria-selected="false">
+                <i class="bi bi-box-seam"></i> Товари
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="variant-tab" data-bs-toggle="tab" data-bs-target="#tabVariants" type="button" role="tab" aria-controls="variants" aria-selected="false">
+                <i class="bi bi-tags"></i> Варіанти
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="batch-tab" data-bs-toggle="tab" data-bs-target="#tabBatches" type="button" role="tab" aria-controls="batches" aria-selected="false">
+                <i class="bi bi-boxes"></i> Склад (Партії)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#tabReports" type="button" role="tab">
+                <i class="bi bi-graph-up-arrow"></i> Звіти
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content pt-4" id="myTabContent">
+
+        <!--БРЕНДИ -->
+        <div class="tab-pane fade show active" id="tabBrands" role="tabpanel" aria-labelledby="brand-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Список брендів <span class="badge bg-secondary">@Model.TotalBrands</span></h3>
+                <a asp-controller="Brands" asp-action="Create" class="btn btn-primary shadow-sm">
+                    <i class="bi bi-plus-circle"></i> Додати бренд
+                </a>
+            </div>
+
+            <div class="table-responsive shadow-sm rounded">
+                <table class="table table-bordered table-striped table-hover align-middle mb-0">
+                    <thead class="table-primary text-center">
+                        <tr>
+                            <th style="width: 80px;">ID</th>
+                            <th>Бренд</th>
+                            <th>Країна</th>
+                            <th style="width: 140px;">Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Brands.Any())
+                        {
+                            foreach (var r in Model.Brands)
+                            {
+                                <tr>
+                                    <td class="text-center">@r.BrandId</td>
+                                    <td><strong>@r.BrandName</strong></td>
+                                    <td>
+                                        <i class="bi bi-geo-alt text-muted"></i> @r.Country
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a asp-controller="Brands" asp-action="Edit" asp-route-id="@r.BrandId" class="btn btn-warning btn-sm" title="Редагувати">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn btn-danger btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteBrandModal"
+                                                    data-brand-id="@r.BrandId"
+                                                    data-brand-name="@r.BrandName"
+                                                    title="Видалити">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="4" class="text-center py-4 text-muted">Дані відсутні</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!--ТОВАРИ-->
+        <div class="tab-pane fade" id="tabProducts" role="tabpanel" aria-labelledby="product-tab">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Товари <span class="badge bg-secondary">@Model.TotalProducts</span></h3>
+                <a asp-controller="Products" asp-action="Create" class="btn btn-success shadow-sm">
+                    <i class="bi bi-plus-circle"></i> Додати товар
+                </a>
+            </div>
+
+            <!-- ФОРМА ПОШУКУ -->
+            <form method="get" asp-controller="Home" asp-action="Index" class="row g-2 mb-4 bg-light p-3 rounded border shadow-sm">
+                <input type="hidden" name="page" value="1" />
+
+                <div class="col-md-3">
+                    <input type="text" name="searchString" value="@Model.CurrentSearch" class="form-control" placeholder="🔍 Пошук за назвою..." />
+                </div>
+                <div class="col-md-3">
+                    <select name="brandId" asp-items="@Model.BrandList" class="form-select">
+                        <option value="">-- Всі Бренди --</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="typeId" asp-items="@Model.TypeList" class="form-select">
+                        <option value="">-- Всі Типи --</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-secondary w-100">
+                        <i class="bi bi-search"></i> Шукати
+                    </button>
+                </div>
+            </form>
+
+            @if (Model.Products.Any())
+            {
+                <div class="table-responsive shadow-sm rounded">
+                    <table class="table table-bordered table-striped table-hover align-middle mb-0">
+                        <thead class="table-success text-center">
+                            <tr>
+                                <th style="width: 90px;">Фото</th>
+                                <th style="width: 60px;">ID</th>
+                                <th style="width: 20%;">Назва</th>
+                                <th style="width: 130px;">Бренд</th>
+                                <th style="width: 130px;">Тип</th>
+                                <th style="width: 110px;">Калорії</th>
+                                <th style="width: 25%;">Опис</th>
+                                <th style="width: 140px;">Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in Model.Products)
+                            {
+                                <tr>
+                                    <td class="text-center">
+                                        @if (!string.IsNullOrEmpty(p.ImageUrl))
+                                        {
+                                            <img src="@p.ImageUrl" alt="@p.Name" class="rounded border" style="width: 60px; height: 60px; object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center text-muted border mx-auto" style="width: 60px; height: 60px; font-size: 10px;">
+                                                No IMG
+                                            </div>
+                                        }
+                                    </td>
+                                    <td class="text-center">@p.ProductId</td>
+                                    <td><strong>@p.Name</strong></td>
+                                    <td>
+                                        @if (p.Brand != null)
+                                        {
+                                            <span class="badge bg-primary">@p.Brand.BrandName</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (p.TypeOfProduct != null)
+                                        {
+                                            <span class="badge bg-info text-dark">@p.TypeOfProduct.TypeOfProductName</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (p.CaloriesPer100g > 0)
+                                        {
+                                            <span>@p.CaloriesPer100g.ToString("F1")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(p.Description))
+                                        {
+                                            var shortDesc = p.Description.Length > 50 ? p.Description.Substring(0, 50) + "..." : p.Description;
+                                            <small class="text-muted">@shortDesc</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a asp-controller="Products" asp-action="Edit" asp-route-id="@p.ProductId" class="btn btn-warning btn-sm" title="Редагувати">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn btn-danger btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteProductModal"
+                                                    data-product-id="@p.ProductId"
+                                                    data-product-name="@p.Name"
+                                                    title="Видалити">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" asp-controller="Home" asp-action="Index"
+                                   asp-route-page="@(Model.CurrentPage - 1)"
+                                   asp-route-searchString="@Model.CurrentSearch"
+                                   asp-route-brandId="@Model.CurrentBrandId"
+                                   asp-route-typeId="@Model.CurrentTypeId">Попередня</a>
+                            </li>
+
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                                    <a class="page-link" asp-controller="Home" asp-action="Index"
+                                       asp-route-page="@i"
+                                       asp-route-searchString="@Model.CurrentSearch"
+                                       asp-route-brandId="@Model.CurrentBrandId"
+                                       asp-route-typeId="@Model.CurrentTypeId">@i</a>
+                                </li>
+                            }
+
+                            <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link" asp-controller="Home" asp-action="Index"
+                                   asp-route-page="@(Model.CurrentPage + 1)"
+                                   asp-route-searchString="@Model.CurrentSearch"
+                                   asp-route-brandId="@Model.CurrentBrandId"
+                                   asp-route-typeId="@Model.CurrentTypeId">Наступна</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="alert alert-info text-center mt-4">
+                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                    <p class="mt-2">Товари не знайдено за вашим запитом.</p>
+                </div>
+            }
+        </div>
+
+        <!--ВАРІАНТИ-->
+        <div class="tab-pane fade" id="tabVariants" role="tabpanel" aria-labelledby="variant-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Варіанти (Ціни) <span class="badge bg-secondary">@Model.TotalVariants</span></h3>
+                <a asp-controller="Variants" asp-action="Create" class="btn btn-warning text-dark shadow-sm">
+                    <i class="bi bi-plus-circle"></i> Додати варіант
+                </a>
+            </div>
+
+            <div class="table-responsive shadow-sm rounded">
+                <table class="table table-bordered table-striped table-hover align-middle mb-0">
+                    <thead class="table-warning text-center">
+                        <tr>
+                            <th style="width: 80px;">ID</th>
+                            <th>Товар</th>
+                            <th>Вага/Об'єм</th>
+                            <th>Ціна (грн)</th>
+                            <th style="width: 140px;">Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Variants.Any())
+                        {
+                            foreach (var v in Model.Variants)
+                            {
+                                <tr>
+                                    <td class="text-center">@v.VariantId</td>
+                                    <td>
+                                        <strong>@(v.Product?.Name ?? "Невідомий товар")</strong>
+                                    </td>
+                                    <td>
+                                        @if (v.Weight != null)
+                                        {
+                                            <span class="badge bg-light text-dark border">
+                                                <i class="bi bi-speedometer2"></i> @v.Weight.WeightValue @v.Weight.Unit
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td class="fw-bold text-success">
+                                        @v.Price.ToString("N2") ₴
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a asp-controller="Variants" asp-action="Edit" asp-route-id="@v.VariantId" class="btn btn-warning btn-sm" title="Редагувати">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+
+                                            <button type="button"
+                                                    class="btn btn-danger btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteVariantModal"
+                                                    data-variant-id="@v.VariantId"
+                                                    data-variant-info="@v.Product?.Name (@v.Weight?.WeightValue @v.Weight?.Unit)"
+                                                    title="Видалити">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="5" class="text-center py-4 text-muted">Дані відсутні</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!--ПАРТІЇ-->
+        <div class="tab-pane fade" id="tabBatches" role="tabpanel" aria-labelledby="batch-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Партії на складі <span class="badge bg-secondary">@Model.TotalBatches</span></h3>
+                <a asp-controller="Batches" asp-action="Create" class="btn btn-info text-white shadow-sm">
+                    <i class="bi bi-plus-circle"></i> Прийняти поставку
+                </a>
+            </div>
+
+            <div class="table-responsive shadow-sm rounded">
+                <table class="table table-bordered table-striped table-hover align-middle mb-0">
+                    <thead class="table-info text-center">
+                        <tr>
+                            <th>ID</th>
+                            <th>Товар (Варіант)</th>
+                            <th>Залишок</th>
+                            <th>Постачальник</th>
+                            <th>Дата вироб.</th>
+                            <th>Придатний до</th>
+                            <th>Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Batches.Any())
+                        {
+                            foreach (var b in Model.Batches)
+                            {
+                                bool isExpired = b.ExpiryDate < DateOnly.FromDateTime(DateTime.Now);
+                                string rowClass = isExpired ? "table-danger" : "";
+
+                                <tr class="@rowClass">
+                                    <td class="text-center">@b.BatchId</td>
+                                    <td>
+                                        @(b.Variant?.Product?.Name ?? "ID:" + b.VariantId)
+                                        <small class="text-muted d-block">
+                                            (@(b.Variant?.Weight?.WeightValue) @(b.Variant?.Weight?.Unit))
+                                        </small>
+                                    </td>
+                                    <td class="text-center fw-bold">
+                                        @b.Stock шт.
+                                    </td>
+                                    <td>@b.SupplierName</td>
+                                    <td class="text-center">@b.ManufactureDate.ToShortDateString()</td>
+                                    <td class="text-center">
+                                        @b.ExpiryDate.ToShortDateString()
+                                        @if (isExpired)
+                                        {
+                                            <br />
+
+                                            <span class="badge bg-danger">Протерміновано!</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <form asp-controller="Batches" asp-action="Delete" asp-route-id="@b.BatchId" method="post" onsubmit="return confirm('Видалити цю партію?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="7" class="text-center py-4 text-muted">Склад порожній</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!--АНАЛІТИКА-->
+        <div class="tab-pane fade" id="tabReports" role="tabpanel" aria-labelledby="reports-tab">
+
+            <div class="card bg-light border mb-4">
+                <div class="card-body py-3">
+                    <form method="get" id="reportForm" class="row g-3 align-items-end">
+                        <input type="hidden" name="searchString" value="@Model.CurrentSearch" />
+                        <input type="hidden" name="brandId" value="@Model.CurrentBrandId" />
+                        <input type="hidden" name="typeId" value="@Model.CurrentTypeId" />
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Кількість ТОП брендів:</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-trophy"></i></span>
+                                <input type="number" name="reportTopCount" value="@Model.ReportTopCount" class="form-control" min="1" max="20">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Поріг дефіциту (шт):</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-exclamation-triangle"></i></span>
+                                <input type="number" name="reportLowStock" value="@Model.ReportLowStockThreshold" class="form-control" min="0">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-arrow-clockwise"></i> Оновити звіти
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="bi bi-graph-up"></i> Аналітика Брендів</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Бренд</th>
+                                        <th class="text-center">Продажі</th>
+                                        <th class="text-end">Оборот</th>
+                                        <th class="text-end">Прибуток</th> 
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.TopBrands.Any())
+                                    {
+                                        @foreach (var item in Model.TopBrands)
+                                        {
+                                            decimal margin = item.TotalRevenue > 0
+                                            ? (item.EstimatedProfit / item.TotalRevenue) * 100
+                                            : 0;
+
+                                            <tr>
+                                                <td><strong>@item.BrandName</strong></td>
+                                                <td class="text-center">@item.SalesCount шт.</td>
+                                                <td class="text-end">@item.TotalRevenue.ToString("N0") ₴</td>
+                                                <td class="text-end fw-bold text-success">
+                                                    @item.EstimatedProfit.ToString("N0") ₴
+                                                    <small class="text-muted d-block" style="font-size: 10px;">(@margin.ToString("F1")%)</small>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr><td colspan="4" class="text-center text-muted py-3">Немає даних за цей період</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-danger text-white d-flex justify-content-between">
+                            <h5 class="mb-0"><i class="bi bi-box-seam"></i> Дефіцит</h5>
+                            <small>менше @Model.ReportLowStockThreshold шт.</small>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Товар</th>
+                                        <th>Бренд</th>
+                                        <th class="text-center">Залишок</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.LowStockProducts.Any())
+                                    {
+                                        @foreach (var item in Model.LowStockProducts)
+                                        {
+                                            <tr>
+                                                <td>@item.Name</td>
+                                                <td class="small text-muted">@item.BrandName</td>
+                                                <td class="text-center text-danger fw-bold">@item.TotalStock шт.</td>
+                                                <td class="text-center">
+                                                    <a asp-controller="Batches" asp-action="Create" class="btn btn-sm btn-outline-danger" title="Замовити">
+                                                        <i class="bi bi-cart-plus"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr><td colspan="4" class="text-center text-success py-3"><i class="bi bi-check-circle"></i> Весь товар в наявності</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<!--МОДАЛЬНІ ВІКНА-->
+<!--Видалення Бренду -->
+<div class="modal fade" id="deleteBrandModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Видалення Бренду</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Ви впевнені, що хочете видалити цей бренд?</p>
+                <h4 class="text-center text-danger" id="deleteBrandName"></h4>
+                <div class="alert alert-warning mt-3 small">
+                    <i class="bi bi-info-circle"></i> Якщо до бренду прив'язані товари, видалення буде неможливим.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                <form id="deleteBrandForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Видалити</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Видалення Продукту-->
+<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Видалення Товару</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Ви впевнені, що хочете видалити цей товар?</p>
+                <h4 class="text-center text-danger" id="deleteProductName"></h4>
+                <p class="text-muted small text-center mt-2">Картинка також буде видалена (або товар буде переміщено в архів).</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                <form id="deleteProductForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Видалити</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Видалення Варіанту-->
+<div class="modal fade" id="deleteVariantModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Видалення Варіанту</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Ви впевнені, що хочете видалити цей варіант?</p>
+                <h5 class="text-center text-danger" id="deleteVariantInfo"></h5>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                <form id="deleteVariantForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Видалити</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var activeTab = localStorage.getItem('activeTab');
+            if (activeTab) {
+                var tabTrigger = new bootstrap.Tab(document.querySelector(activeTab));
+                tabTrigger.show();
+            }
+
+            var tabLinks = document.querySelectorAll('button[data-bs-toggle="tab"]');
+            tabLinks.forEach(function (tabLink) {
+                tabLink.addEventListener('shown.bs.tab', function (event) {
+                    localStorage.setItem('activeTab', '#' + event.target.id);
+                });
+            });
+        });
+
+        const deleteBrandModal = document.getElementById('deleteBrandModal');
+        if (deleteBrandModal) {
+            deleteBrandModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-brand-id');
+                const name = button.getAttribute('data-brand-name');
+                document.getElementById('deleteBrandName').textContent = name;
+                document.getElementById('deleteBrandForm').action = '/Brands/Delete/' + id;
+            });
+        }
+
+                const deleteProductModal = document.getElementById('deleteProductModal');
+        if (deleteProductModal) {
+            deleteProductModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-product-id');
+                const name = button.getAttribute('data-product-name');
+                document.getElementById('deleteProductName').textContent = name;
+                document.getElementById('deleteProductForm').action = '/Products/Delete/' + id;
+            });
+        }
+
+        const deleteVariantModal = document.getElementById('deleteVariantModal');
+        if (deleteVariantModal) {
+            deleteVariantModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-variant-id');
+                const info = button.getAttribute('data-variant-info');
+                document.getElementById('deleteVariantInfo').textContent = info;
+                document.getElementById('deleteVariantForm').action = '/Variants/Delete/' + id;
+            });
+        }
+    </script>
+}

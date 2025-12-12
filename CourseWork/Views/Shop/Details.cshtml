@@ -1,0 +1,169 @@
+﻿@model CourseWork.Models.Product
+@{
+    ViewData["Title"] = Model.Name;
+    Layout = "~/Views/Shared/_LayoutShop.cshtml";
+
+    var variants = Model.ProductVariants.OrderBy(v => v.Price).ToList();
+    var defaultVariant = variants.FirstOrDefault(v => v.ProductBatches.Sum(b => b.Stock) > 0) ?? variants.FirstOrDefault();
+}
+
+<div class="col-md-6 border-start ps-4">
+    <div id="variant-info">
+        <div class="mb-2">
+            @if (defaultVariant != null && defaultVariant.ProductBatches.Sum(b => b.Stock) > 0)
+            {
+                <span class="text-success"><i class="bi bi-check-circle"></i> Є в наявності</span>
+                <span class="badge bg-light text-dark border ms-2">Залишок: @defaultVariant.ProductBatches.Sum(b => b.Stock) шт.</span>
+            }
+            else
+            {
+                <span class="text-danger"><i class="bi bi-x-circle"></i> Немає в наявності</span>
+            }
+        </div>
+
+        <div class="price-block my-3">
+            <span id="displayPrice">@(defaultVariant?.Price.ToString("N0") ?? "0")</span> <span class="currency">₴</span>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="mb-4">
+        <p class="mb-2 fw-bold">Оберіть вагу:</p>
+        <div class="d-flex flex-wrap gap-2">
+            @foreach (var v in variants)
+            {
+                int stock = v.ProductBatches.Sum(b => b.Stock);
+                bool inStock = stock > 0;
+
+                <button class="btn btn-outline-secondary variant-btn @(v == defaultVariant ? "active" : "") @(!inStock ? "opacity-50" : "")"
+                        onclick="updateVariantInfo(@v.Price, @stock, this)">
+                    @v.Weight?.WeightValue @v.Weight?.Unit
+                </button>
+            }
+        </div>
+    </div>
+
+    <button class="btn btn-buy w-100 py-3 rounded shadow-sm">
+        <i class="bi bi-cart3 me-2"></i> Додати в кошик
+    </button>
+</div>
+
+
+<div class="tab-pane fade" id="reviews" role="tabpanel">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4>Відгуки покупців</h4>
+
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addReviewModal">
+            <i class="bi bi-pencil-square"></i> Написати відгук
+        </button>
+    </div>
+
+    @if (Model.Reviews.Any())
+    {
+        <div class="vstack gap-3">
+            @foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedAt))
+            {
+                <div class="border rounded p-3 bg-light">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person-circle fs-4 me-2 text-secondary"></i>
+                            <strong>@(review.User?.FullName ?? "Клієнт")</strong>
+                        </div>
+                        <span class="text-muted small">@review.CreatedAt?.ToShortDateString()</span>
+                    </div>
+
+                    <div class="mb-2">
+                        @if (review.Rating == 1)
+                        {
+                            <span class="badge bg-success"><i class="bi bi-hand-thumbs-up-fill"></i> Рекомендую</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger"><i class="bi bi-hand-thumbs-down-fill"></i> Не рекомендую</span>
+                        }
+                    </div>
+
+                    <p class="mb-0 text-break">@review.Comment</p>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 text-muted border rounded bg-light border-dashed">
+            <i class="bi bi-chat-square-dots fs-1"></i>
+            <p class="mt-2">Ще немає відгуків. Ваш може бути першим!</p>
+        </div>
+    }
+</div>
+
+
+<div class="modal fade" id="addReviewModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="AddReview" method="post">
+                <input type="hidden" name="productId" value="@Model.ProductId" />
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Залишити відгук</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body text-center">
+                    <p>Чи сподобався вам цей товар?</p>
+
+                    <div class="btn-group w-100 mb-3" role="group">
+                        <input type="radio" class="btn-check" name="rating" id="like" value="1" checked>
+                        <label class="btn btn-outline-success" for="like">
+                            <i class="bi bi-hand-thumbs-up-fill"></i> Сподобався
+                        </label>
+
+                        <input type="radio" class="btn-check" name="rating" id="dislike" value="-1">
+                        <label class="btn btn-outline-danger" for="dislike">
+                            <i class="bi bi-hand-thumbs-down-fill"></i> Не сподобався
+                        </label>
+                    </div>
+
+                    <div class="text-start">
+                        <label class="form-label">Коментар:</label>
+                        <textarea name="comment" class="form-control" rows="3" placeholder="Розкажіть про смак, упаковку..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                    <button type="submit" class="btn btn-primary">Надіслати</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateVariantInfo(price, stock, btn) {
+
+            document.getElementById('displayPrice').innerText = price.toLocaleString('uk-UA');
+
+            document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active', 'btn-success'));
+            document.querySelectorAll('.variant-btn').forEach(b => b.classList.add('btn-outline-secondary'));
+
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('btn-success', 'active');
+
+            const infoDiv = document.getElementById('variant-info');
+            if (stock > 0) {
+                infoDiv.children[0].innerHTML = `
+                            <span class="text-success"><i class="bi bi-check-circle"></i> Є в наявності</span>
+                            <span class="badge bg-light text-dark border ms-2">Залишок: ${stock} шт.</span>
+                        `;
+            } else {
+                infoDiv.children[0].innerHTML = `
+                            <span class="text-danger"><i class="bi bi-x-circle"></i> Немає в наявності</span>
+                        `;
+            }
+        }
+    </script>
+}

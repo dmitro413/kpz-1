@@ -1,0 +1,53 @@
+﻿@model object
+@{
+    ViewBag.Title = "Видалення запису";
+    string tableName = ViewBag.TableName;
+
+    var properties = Model.GetType().GetProperties();
+    var pkProperty = properties.FirstOrDefault(p => p.Name.EndsWith("ID", StringComparison.OrdinalIgnoreCase) || p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase));
+    var idValue = pkProperty != null ? pkProperty.GetValue(Model) : 0;
+}
+
+<h3>Ви впевнені, що хочете видалити цей запис із таблиці: <b>@tableName</b>?</h3>
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger">
+        <strong>Помилка!</strong> @ViewBag.ErrorMessage
+    </div>
+}
+
+<div class="alert alert-warning">
+    <dl class="row">
+        @foreach (var prop in properties)
+        {
+            if (prop.PropertyType.IsPrimitive || prop.PropertyType == typeof(string) || prop.PropertyType == typeof(DateTime) || prop.PropertyType == typeof(decimal))
+            {
+                <dt class="col-sm-3">@prop.Name</dt>
+                <dd class="col-sm-9">
+                    @{
+                        var val = prop.GetValue(Model);
+                        if (val == null)
+                        {
+                            <text>-</text>
+                        }
+                        else
+                        {
+                            @val
+                        }
+                    }
+                </dd>
+            }
+        }
+    </dl>
+</div>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" name="table" value="@tableName" />
+    <input type="hidden" name="id" value="@idValue" />
+
+    <div class="form-actions no-color">
+        <input type="submit" value="Видалити" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">Назад до списку</a>
+    </div>
+</form>
