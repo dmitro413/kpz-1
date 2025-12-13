@@ -15,9 +15,6 @@ public partial class MyDbContext : DbContext
     }
 
     public virtual DbSet<Brand> Brands { get; set; }
-    public virtual DbSet<BulkTest> BulkTests { get; set; }
-    public virtual DbSet<DemoOrder> DemoOrders { get; set; }
-    public virtual DbSet<DemoOrderDetail> DemoOrderDetails { get; set; }
     public virtual DbSet<Order> Orders { get; set; }
     public virtual DbSet<OrderDetail> OrderDetails { get; set; }
     public virtual DbSet<OrderStatus> OrderStatuses { get; set; }
@@ -28,9 +25,10 @@ public partial class MyDbContext : DbContext
     public virtual DbSet<SchemaVersion> SchemaVersions { get; set; }
     public virtual DbSet<TypeOfProduct> TypeOfProducts { get; set; }
     public virtual DbSet<User> Users { get; set; }
-    public virtual DbSet<VwTestView> VwTestViews { get; set; }
     public virtual DbSet<Weight> Weights { get; set; }
     public virtual DbSet<LowStockProductDto> LowStockProducts { get; set; }
+    public virtual DbSet<ExpiringBatchDto> ExpiringBatches { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)=> optionsBuilder.UseSqlServer("Server=DESKTOP-2788V47;Database=SweetShop;Trusted_Connection=True;TrustServerCertificate=True;");
 
@@ -154,19 +152,7 @@ public partial class MyDbContext : DbContext
             entity.ToTable(tb => tb.HasTrigger("TR_UpdateProductRating"));
         });
 
-
-        modelBuilder.Entity<BulkTest>(entity => { 
-            entity.HasNoKey().ToTable("BulkTest"); 
-            entity.Property(e => e.TempData).HasMaxLength(50); 
-        });
-        modelBuilder.Entity<DemoOrder>(entity => {
-            entity.HasKey(e => e.OrderId).HasName("PK__DemoOrde__C3905BCF5AE2F63A"); 
-            entity.Property(e => e.CustomerName).HasMaxLength(100); entity.Property(e => e.OrderDate).HasColumnType("datetime"); 
-        });
-        modelBuilder.Entity<DemoOrderDetail>(entity => { 
-            entity.HasKey(e => e.DetailId).HasName("PK__DemoOrde__135C316DFA06B567"); 
-            entity.Property(e => e.Price).HasColumnType("decimal(18, 2)"); 
-        });
+      
 
         modelBuilder.Entity<OrderDetail>(entity => { 
             entity.HasKey(e => e.OrderDetailId).HasName("PK__OrderDet__D3B9D30C4FE21A12"); 
@@ -203,7 +189,6 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.Role).HasMaxLength(50).HasDefaultValue("Customer"); 
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())").HasColumnType("datetime"); 
         });
-        modelBuilder.Entity<VwTestView>(entity => { entity.HasNoKey().ToView("vw_TestView"); });
 
         modelBuilder.Entity<Weight>(entity => { 
             entity.HasKey(e => e.WeightId).HasName("PK__Weight__02A0F3FBC27949F2"); 

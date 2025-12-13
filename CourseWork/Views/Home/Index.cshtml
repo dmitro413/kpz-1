@@ -31,6 +31,11 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link" id="type-tab" data-bs-toggle="tab" data-bs-target="#tabTypes" type="button" role="tab">
+                <i class="bi bi-list-ul"></i> Типи
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link" id="product-tab" data-bs-toggle="tab" data-bs-target="#tabProducts" type="button" role="tab" aria-controls="products" aria-selected="false">
                 <i class="bi bi-box-seam"></i> Товари
             </button>
@@ -50,6 +55,8 @@
                 <i class="bi bi-graph-up-arrow"></i> Звіти
             </button>
         </li>
+       
+
     </ul>
 
     <div class="tab-content pt-4" id="myTabContent">
@@ -106,6 +113,57 @@
                         else
                         {
                             <tr><td colspan="4" class="text-center py-4 text-muted">Дані відсутні</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!--ТИПИ ПРОДУКТІВ-->
+        <div class="tab-pane fade" id="tabTypes" role="tabpanel" aria-labelledby="type-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Категорії товарів <span class="badge bg-secondary">@Model.TotalTypes</span></h3>
+                <a asp-controller="Types" asp-action="Create" class="btn btn-secondary shadow-sm">
+                    <i class="bi bi-plus-circle"></i> Додати тип
+                </a>
+            </div>
+
+            <div class="table-responsive shadow-sm rounded">
+                <table class="table table-bordered table-striped table-hover align-middle mb-0">
+                    <thead class="table-secondary text-center">
+                        <tr>
+                            <th style="width: 80px;">ID</th>
+                            <th>Назва категорії</th>
+                            <th style="width: 140px;">Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Types.Any())
+                        {
+                            foreach (var t in Model.Types)
+                            {
+                                <tr>
+                                    <td class="text-center">@t.TypeOfProductId</td>
+                                    <td><strong>@t.TypeOfProductName</strong></td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a asp-controller="Types" asp-action="Edit" asp-route-id="@t.TypeOfProductId" class="btn btn-warning btn-sm">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form asp-controller="Types" asp-action="Delete" asp-route-id="@t.TypeOfProductId" method="post" style="display:inline;" onsubmit="return confirm('Видалити цю категорію?');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteTypeModal"
+                                                        data-type-id="@t.TypeOfProductId" data-type-name="@t.TypeOfProductName"title="Видалити">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="3" class="text-center py-4 text-muted">Категорій немає</td></tr>
                         }
                     </tbody>
                 </table>
@@ -432,6 +490,7 @@
         <!--АНАЛІТИКА-->
         <div class="tab-pane fade" id="tabReports" role="tabpanel" aria-labelledby="reports-tab">
 
+            <!--ПАНЕЛЬ НАЛАШТУВАНЬ-->
             <div class="card bg-light border mb-4">
                 <div class="card-body py-3">
                     <form method="get" id="reportForm" class="row g-3 align-items-end">
@@ -439,45 +498,78 @@
                         <input type="hidden" name="brandId" value="@Model.CurrentBrandId" />
                         <input type="hidden" name="typeId" value="@Model.CurrentTypeId" />
 
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold text-muted">Кількість ТОП брендів:</label>
-                            <div class="input-group">
+                        <!--Топ Брендів-->
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted">Топ брендів:</label>
+                            <div class="input-group input-group-sm">
                                 <span class="input-group-text bg-white"><i class="bi bi-trophy"></i></span>
                                 <input type="number" name="reportTopCount" value="@Model.ReportTopCount" class="form-control" min="1" max="20">
                             </div>
                         </div>
 
-                        <div class="col-md-4">
+                        <!--Дефіцит-->
+                        <div class="col-md-3">
                             <label class="form-label small fw-bold text-muted">Поріг дефіциту (шт):</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white"><i class="bi bi-exclamation-triangle"></i></span>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white"><i class="bi bi-box-seam"></i></span>
                                 <input type="number" name="reportLowStock" value="@Model.ReportLowStockThreshold" class="form-control" min="0">
                             </div>
                         </div>
 
-                        <div class="col-md-4">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-arrow-clockwise"></i> Оновити звіти
+                        <!-- Термін придатності -->
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold text-muted">Спливають через (днів):</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white"><i class="bi bi-hourglass-split"></i></span>
+                                <input type="number" name="reportDaysExpiry" value="@Model.ReportDaysUntilExpiry" class="form-control" min="1">
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary btn-sm w-100">
+                                <i class="bi bi-arrow-clockwise"></i> Оновити всі звіти
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-7">
-                    <div class="card shadow-sm border-0 mb-4">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="mb-0"><i class="bi bi-graph-up"></i> Аналітика Брендів</h5>
-                        </div>
+            <!--НАВІГАЦІЯ-->
+            <ul class="nav nav-pills mb-3 justify-content-center" id="reportTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="sales-subtab" data-bs-toggle="pill" data-bs-target="#pills-sales" type="button" role="tab">
+                        <i class="bi bi-graph-up"></i> Продажі
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="stock-subtab" data-bs-toggle="pill" data-bs-target="#pills-stock" type="button" role="tab">
+                        <i class="bi bi-exclamation-triangle"></i> Дефіцит
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="expiry-subtab" data-bs-toggle="pill" data-bs-target="#pills-expiry" type="button" role="tab">
+                        <i class="bi bi-calendar-x"></i> Терміни придатності
+                        @if (Model.ExpiringBatches.Any())
+                        {
+                            <span class="badge bg-danger ms-1">@Model.ExpiringBatches.Count</span>
+                        }
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="pills-tabContent">
+
+                <!-- ПРОДАЖІ-->
+                <div class="tab-pane fade show active" id="pills-sales" role="tabpanel">
+                    <div class="card shadow-sm border-0">
                         <div class="card-body p-0">
                             <table class="table table-striped mb-0">
-                                <thead>
+                                <thead class="table-success">
                                     <tr>
                                         <th>Бренд</th>
-                                        <th class="text-center">Продажі</th>
+                                        <th class="text-center">Продано шт.</th>
                                         <th class="text-end">Оборот</th>
-                                        <th class="text-end">Прибуток</th> 
+                                        <th class="text-end">Прибуток</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -485,13 +577,10 @@
                                     {
                                         @foreach (var item in Model.TopBrands)
                                         {
-                                            decimal margin = item.TotalRevenue > 0
-                                            ? (item.EstimatedProfit / item.TotalRevenue) * 100
-                                            : 0;
-
+                                            decimal margin = item.TotalRevenue > 0 ? (item.EstimatedProfit / item.TotalRevenue) * 100 : 0;
                                             <tr>
                                                 <td><strong>@item.BrandName</strong></td>
-                                                <td class="text-center">@item.SalesCount шт.</td>
+                                                <td class="text-center">@item.SalesCount</td>
                                                 <td class="text-end">@item.TotalRevenue.ToString("N0") ₴</td>
                                                 <td class="text-end fw-bold text-success">
                                                     @item.EstimatedProfit.ToString("N0") ₴
@@ -502,7 +591,7 @@
                                     }
                                     else
                                     {
-                                        <tr><td colspan="4" class="text-center text-muted py-3">Немає даних за цей період</td></tr>
+                                        <tr><td colspan="4" class="text-center py-3">Немає даних</td></tr>
                                     }
                                 </tbody>
                             </table>
@@ -510,20 +599,17 @@
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <!--ДЕФІЦИТ-->
+                <div class="tab-pane fade" id="pills-stock" role="tabpanel">
                     <div class="card shadow-sm border-0">
-                        <div class="card-header bg-danger text-white d-flex justify-content-between">
-                            <h5 class="mb-0"><i class="bi bi-box-seam"></i> Дефіцит</h5>
-                            <small>менше @Model.ReportLowStockThreshold шт.</small>
-                        </div>
                         <div class="card-body p-0">
                             <table class="table table-hover mb-0">
-                                <thead>
+                                <thead class="table-danger">
                                     <tr>
                                         <th>Товар</th>
                                         <th>Бренд</th>
                                         <th class="text-center">Залишок</th>
-                                        <th></th>
+                                        <th class="text-center">Дія</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -533,25 +619,75 @@
                                         {
                                             <tr>
                                                 <td>@item.Name</td>
-                                                <td class="small text-muted">@item.BrandName</td>
+                                                <td class="text-muted">@item.BrandName</td>
                                                 <td class="text-center text-danger fw-bold">@item.TotalStock шт.</td>
                                                 <td class="text-center">
-                                                    <a asp-controller="Batches" asp-action="Create" class="btn btn-sm btn-outline-danger" title="Замовити">
-                                                        <i class="bi bi-cart-plus"></i>
-                                                    </a>
+                                                    <a asp-controller="Batches" asp-action="Create" class="btn btn-sm btn-outline-danger"><i class="bi bi-cart-plus"></i></a>
                                                 </td>
                                             </tr>
                                         }
                                     }
                                     else
                                     {
-                                        <tr><td colspan="4" class="text-center text-success py-3"><i class="bi bi-check-circle"></i> Весь товар в наявності</td></tr>
+                                        <tr><td colspan="4" class="text-center text-success py-3"><i class="bi bi-check-lg"></i> Все в наявності</td></tr>
                                     }
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+
+                <!-- ТЕРМІНИ-->
+                <div class="tab-pane fade" id="pills-expiry" role="tabpanel">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-0">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-warning">
+                                    <tr>
+                                        <th>Товар</th>
+                                        <th>Партія ID</th>
+                                        <th>Вага</th>
+                                        <th class="text-center">Виготовлено</th>
+                                        <th class="text-center">Придатний до</th>
+                                        <th class="text-center">Залишок</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.ExpiringBatches.Any())
+                                    {
+                                        @foreach (var b in Model.ExpiringBatches)
+                                        {
+                                            bool isExpired = b.ExpiryDate < DateOnly.FromDateTime(DateTime.Now);
+
+                                            <tr class="@(isExpired ? "table-danger" : "")">
+                                                <td>
+                                                    <strong>@b.ProductName</strong>
+                                                    <small class="d-block text-muted">@b.BrandName</small>
+                                                </td>
+                                                <td>#@b.BatchID</td>
+                                                <td>@b.WeightValue @b.Unit</td>
+                                                <td class="text-center">@b.ManufactureDate</td>
+                                                <td class="text-center fw-bold">
+                                                    @b.ExpiryDate
+                                                    @if (isExpired)
+                                                    {
+                                                        <span class="badge bg-danger">ПРОСТРОЧЕНО</span>
+                                                    }
+                                                </td>
+                                                <td class="text-center">@b.RemainingStock шт.</td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr><td colspan="6" class="text-center text-success py-3"><i class="bi bi-check-lg"></i> Немає проблемних партій у найближчі @Model.ReportDaysUntilExpiry днів</td></tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -581,7 +717,31 @@
         </div>
     </div>
 </div>
-
+<!--Видалення Типу Продукту-->
+<div class="modal fade" id="deleteTypeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Видалення Категорії</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Ви впевнені, що хочете видалити цю категорію?</p>
+                <h4 class="text-center text-danger" id="deleteTypeName"></h4>
+                <div class="alert alert-warning mt-3 small">
+                    <i class="bi bi-info-circle"></i> Якщо до категорії прив'язані товари, видалення буде неможливим.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                <form id="deleteTypeForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Видалити</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <!--Видалення Продукту-->
 <div class="modal fade" id="deleteProductModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -678,5 +838,16 @@
                 document.getElementById('deleteVariantForm').action = '/Variants/Delete/' + id;
             });
         }
+
+        const deleteTypeModal = document.getElementById('deleteTypeModal');
+    if (deleteTypeModal) {
+        deleteTypeModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;        
+            const id = button.getAttribute('data-type-id');
+            const name = button.getAttribute('data-type-name');
+            document.getElementById('deleteTypeName').textContent = name;      
+            document.getElementById('deleteTypeForm').action = '/Types/Delete/' + id;
+        });
+    }
     </script>
 }

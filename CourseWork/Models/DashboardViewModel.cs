@@ -8,12 +8,18 @@ namespace CourseWork.Models
         public IEnumerable<Product> Products { get; set; } = new List<Product>();
         public IEnumerable<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
         public IEnumerable<ProductBatch> Batches { get; set; } = new List<ProductBatch>();
+        public IEnumerable<TypeOfProduct> Types { get; set; } = new List<TypeOfProduct>();
+
         public List<BrandStatsDto> TopBrands { get; set; } = new();
         public List<LowStockProductDto> LowStockProducts { get; set; } = new();
+        public List<ExpiringBatchDto> ExpiringBatches { get; set; } = new();
+
+
         public int TotalBrands { get; set; }
         public int TotalProducts { get; set; }
         public int TotalVariants { get; set; }
         public int TotalBatches { get; set; }
+        public int TotalTypes { get; set; } 
 
 
         public int CurrentPage { get; set; } = 1;
@@ -24,6 +30,7 @@ namespace CourseWork.Models
         public int? CurrentBrandId { get; set; }
         public int? CurrentTypeId { get; set; }
 
+        public int ReportDaysUntilExpiry { get; set; } = 30;
 
         public int ReportTopCount { get; set; } = 5;      
         public int ReportLowStockThreshold { get; set; } = 10;

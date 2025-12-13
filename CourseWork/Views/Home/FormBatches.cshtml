@@ -36,7 +36,6 @@
 
                         <hr />
 
-
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label asp-for="PurchasePrice" class="form-label">Ціна закупівлі (за 1 шт)</label>
@@ -45,6 +44,15 @@
                                     <span class="input-group-text">₴</span>
                                 </div>
                                 <span asp-validation-for="PurchasePrice" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="SupplierName" class="form-label">Постачальник</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-truck"></i></span>
+                                    <input asp-for="SupplierName" class="form-control" placeholder="Назва фірми або ім'я..." />
+                                </div>
+                                <span asp-validation-for="SupplierName" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-6 mb-3">

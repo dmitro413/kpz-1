@@ -47,7 +47,7 @@ namespace CourseWork.Controllers
             ViewBag.CurrentType = typeId;
             ViewBag.CurrentRating = minRating;
 
-            return View(products);
+            return View("IndexSHOP", products);
         }
 
         public async Task<IActionResult> Details(int id)

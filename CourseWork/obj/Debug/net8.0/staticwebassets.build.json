@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "jkjjHV93/zaRSnMh6R4P8xPLfz+23N1D8zBtfrVRqIE=",
+  "Hash": "OCqDB/2+ZzWPKteKQGmnTtwonqxYPGMIYZeK3/G78rg=",
   "Source": "CourseWork",
   "BasePath": "_content/CourseWork",
   "Mode": "Default",
@@ -129,6 +129,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\images\\products\\78063995-e9bd-4530-98bf-ddac46a48d74.jpg"
+    },
+    {
+      "Identity": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\8e5c6b5e-7c96-46d5-ba39-04c892e08ef6.jpg",
+      "SourceId": "CourseWork",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\",
+      "BasePath": "_content/CourseWork",
+      "RelativePath": "images/products/8e5c6b5e-7c96-46d5-ba39-04c892e08ef6.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\products\\8e5c6b5e-7c96-46d5-ba39-04c892e08ef6.jpg"
     },
     {
       "Identity": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\b60079b3-bf0f-41a4-9b0a-b1353943cf4d.jpg",

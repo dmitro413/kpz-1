@@ -13,10 +13,8 @@ C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\CourseWork.c
 C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\CourseWork.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\CourseWork.RazorAssemblyInfo.cache
 C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\CourseWork.RazorAssemblyInfo.cs
-C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\CourseWork.sourcelink.json
 C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\staticwebassets.development.json
-C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\scopedcss\bundle\CourseWork.styles.css
 C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\scopedcss\projectbundle\CourseWork.bundle.scp.css
 C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\CourseWork.dll
@@ -142,3 +140,4 @@ C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\staticwebass
 C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.CourseWork.props
 C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.CourseWork.props
 C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\staticwebassets.pack.json
+C:\Users\lenovo\source\repos\CourseWork\CourseWork\obj\Debug\net8.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css

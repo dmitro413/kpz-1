@@ -44,4 +44,31 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
+    <script>
+        function updateCardState(priceId, statusId, priceRaw, isAvailable, btn) {
+            const price = parseFloat(priceRaw); 
+            const priceEl = document.getElementById(priceId);
+            priceEl.innerHTML = price.toLocaleString('uk-UA', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' <span class="price-currency">₴</span>';
+
+            const statusEl = document.getElementById(statusId);
+            if (isAvailable) {
+                statusEl.textContent = "В наявності";
+                statusEl.className = "fw-bold text-success";
+            } else {
+                statusEl.textContent = "Закінчився";
+                statusEl.className = "fw-bold text-muted";
+            }
+
+            const container = btn.closest('.variant-container');
+            
+            const allButtons = container.querySelectorAll('button');
+            allButtons.forEach(b => {
+                b.classList.remove('btn-success');
+                b.classList.add('btn-outline-secondary');
+            });
+
+            btn.classList.remove('btn-outline-secondary');
+            btn.classList.add('btn-success');
+        }
+    </script>
 </html>

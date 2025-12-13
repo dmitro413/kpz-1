@@ -18,14 +18,11 @@ namespace CourseWork.Repositories
                 .Take(pageSize)
                 .ToListAsync();
         }
-
-        public async Task<IEnumerable<ProductBatch>> GetExpiringBatchesAsync(int days)
+ 
+        public async Task<List<ExpiringBatchDto>> GetExpiringBatchesSPAsync(int days)
         {
-            var thresholdDate = DateOnly.FromDateTime(DateTime.Now.AddDays(days));
-
-            return await _dbSet
-                .Include(b => b.Variant).ThenInclude(v => v.Product)
-                .Where(b => b.ExpiryDate <= thresholdDate && b.Stock > 0)
+            return await _context.ExpiringBatches
+                .FromSqlInterpolated($"EXEC dbo.FindExpiringProductBatches @DaysUntilExpiry={days}")
                 .ToListAsync();
         }
     }

@@ -1,0 +1,51 @@
+﻿@model CourseWork.Models.TypeOfProduct
+
+@{
+    bool isEdit = Model != null && Model.TypeOfProductId > 0;
+    ViewBag.Title = isEdit ? "Редагування типу" : "Додати новий тип";
+    string action = isEdit ? "Edit" : "Create";
+    string btnText = isEdit ? "Зберегти зміни" : "Створити";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0">@ViewBag.Title</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-controller="Types" asp-action="@action" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        @if (isEdit)
+                        {
+                            <input type="hidden" asp-for="TypeOfProductId" />
+                        }
+
+                        <div class="mb-3">
+                            <label asp-for="TypeOfProductName" class="form-label">Назва типу (Категорія)</label>
+                            <input asp-for="TypeOfProductName" class="form-control" placeholder="Наприклад: Шоколад, Печиво..." />
+                            <span asp-validation-for="TypeOfProductName" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between pt-3">
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Назад
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-lg"></i> @btnText
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
