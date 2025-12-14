@@ -1,0 +1,156 @@
+﻿using CourseWork.Data;
+using CourseWork.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using System.Text.RegularExpressions;
+
+namespace CourseWork.Controllers
+{
+    [Authorize(Roles = "Admin")]
+    public class UsersController : Controller
+    {
+        private readonly UnitOfWork _unitOfWork;
+
+        public UsersController(UnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            return View("~/Views/Home/FormUser.cshtml", new User());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(User user)
+        {
+            if (string.IsNullOrEmpty(user.PasswordHash))
+            {
+                ModelState.AddModelError("PasswordHash", "Введіть пароль");
+            }
+            if (!string.IsNullOrEmpty(user.Phone))
+            {
+                if (!Regex.IsMatch(user.Phone, @"^\+380\d{9}$"))
+                {
+                    ModelState.AddModelError("Phone", "Невірний формат.");
+                }
+            }
+
+            if (ModelState.IsValid)
+            {
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
+
+                user.CreatedAt = DateTime.UtcNow;
+                user.UpdatedAt = DateTime.UtcNow;
+
+                try
+                {
+                    await _unitOfWork.Users.AddAsync(user);
+                    await _unitOfWork.SaveAsync();
+                    TempData["Success"] = "Користувача створено.";
+                    return RedirectToAction("Index", "Home");
+                }
+                catch (DbUpdateException)
+                {
+                    ModelState.AddModelError("Email", "Цей Email вже існує.");
+                }
+            }
+            return View("~/Views/Home/FormUser.cshtml", user);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(id);
+            if (user == null) return NotFound();
+            
+            user.PasswordHash = ""; 
+            
+            return View("~/Views/Home/FormUser.cshtml", user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(User user)
+        {
+            ModelState.Remove("PasswordHash");
+
+            if (!string.IsNullOrEmpty(user.Phone))
+            {
+                if (!Regex.IsMatch(user.Phone, @"^\+380\d{9}$"))
+                {
+                    ModelState.AddModelError("Phone", "Невірний формат.");
+                }
+            }
+            if (ModelState.IsValid)
+            {
+                var existing = await _unitOfWork.Users.GetByIdAsync(user.UserId);
+                if (existing == null) return NotFound();
+
+                if (existing.Email != user.Email)
+                {
+                    var userWithSameEmail = await _unitOfWork.Users.GetByEmailAsync(user.Email);
+                    if (userWithSameEmail != null)
+                    {
+                        ModelState.AddModelError("Email", "Цей Email вже зайнятий іншим користувачем.");
+                        return View("~/Views/Home/FormUser.cshtml", user);
+                    }
+                }
+                existing.FullName = user.FullName;
+                existing.Email = user.Email;
+                existing.Phone = user.Phone;
+                existing.UpdatedAt = DateTime.UtcNow;
+
+                var currentUserIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (currentUserIdStr != null && int.Parse(currentUserIdStr) == user.UserId)
+                {}
+                else
+                {
+                    existing.Role = user.Role;
+                }
+
+                try
+                {
+                    _unitOfWork.Users.Update(existing);
+                    await _unitOfWork.SaveAsync();
+
+                    TempData["Success"] = "Користувача успішно оновлено.";
+                    return RedirectToAction("Index", "Home");
+                }
+                catch (DbUpdateException ex)
+                {
+                    ModelState.AddModelError("", "Помилка бази даних: не вдалося зберегти зміни.");
+                }
+            }
+
+            return View("~/Views/Home/FormUser.cshtml", user);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var user = await _unitOfWork.Users.GetByIdAsync(id);
+            if (user != null)
+            {
+                try
+                {
+                    _unitOfWork.Users.Remove(user);
+                    await _unitOfWork.SaveAsync();
+                    TempData["Success"] = "Користувача видалено.";
+                }
+                catch
+                {
+                    TempData["Error"] = "Неможливо видалити: у користувача є замовлення.";
+                }
+            }
+            return RedirectToAction("Index", "Home");
+        }
+        
+    }
+}

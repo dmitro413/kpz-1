@@ -36,6 +36,11 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link" id="weight-tab" data-bs-toggle="tab" data-bs-target="#tabWeights" type="button" role="tab">
+                <i class="bi bi-speedometer2"></i> Вага
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link" id="product-tab" data-bs-toggle="tab" data-bs-target="#tabProducts" type="button" role="tab" aria-controls="products" aria-selected="false">
                 <i class="bi bi-box-seam"></i> Товари
             </button>
@@ -48,6 +53,11 @@
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="batch-tab" data-bs-toggle="tab" data-bs-target="#tabBatches" type="button" role="tab" aria-controls="batches" aria-selected="false">
                 <i class="bi bi-boxes"></i> Склад (Партії)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="user-tab" data-bs-toggle="tab" data-bs-target="#tabUsers" type="button" role="tab">
+                <i class="bi bi-people"></i> Користувачі
             </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -96,6 +106,7 @@
                                             <a asp-controller="Brands" asp-action="Edit" asp-route-id="@r.BrandId" class="btn btn-warning btn-sm" title="Редагувати">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
+                                             @if (User.IsInRole("Admin")){
                                             <button type="button"
                                                     class="btn btn-danger btn-sm"
                                                     data-bs-toggle="modal"
@@ -105,6 +116,7 @@
                                                     title="Видалити">
                                                 <i class="bi bi-trash"></i>
                                             </button>
+                                            }
                                         </div>
                                     </td>
                                 </tr>
@@ -151,10 +163,12 @@
                                             </a>
                                             <form asp-controller="Types" asp-action="Delete" asp-route-id="@t.TypeOfProductId" method="post" style="display:inline;" onsubmit="return confirm('Видалити цю категорію?');">
                                                 @Html.AntiForgeryToken()
-                                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteTypeModal"
-                                                        data-type-id="@t.TypeOfProductId" data-type-name="@t.TypeOfProductName"title="Видалити">
+                                                @if (User.IsInRole("Admin"))
+                                                {
+                                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteTypeModal"
+                                                    data-type-id="@t.TypeOfProductId" data-type-name="@t.TypeOfProductName"title="Видалити">
                                                     <i class="bi bi-trash"></i>
-                                                </button>
+                                                </button>}
                                             </form>
                                         </div>
                                     </td>
@@ -164,6 +178,65 @@
                         else
                         {
                             <tr><td colspan="3" class="text-center py-4 text-muted">Категорій немає</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!--ВАГА-->
+        <div class="tab-pane fade" id="tabWeights" role="tabpanel" aria-labelledby="weight-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Одиниці виміру <span class="badge bg-secondary">@Model.TotalWeights</span></h3>
+                <a asp-controller="Weights" asp-action="Create" class="btn btn-dark shadow-sm">
+                    <i class="bi bi-plus-circle"></i> Додати вагу
+                </a>
+            </div>
+
+            <div class="table-responsive shadow-sm rounded">
+                <table class="table table-bordered table-striped table-hover align-middle mb-0">
+                    <thead class="table-dark text-center">
+                        <tr>
+                            <th style="width: 80px;">ID</th>
+                            <th>Значення</th>
+                            <th>Одиниця</th>
+                            <th style="width: 140px;">Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Weights.Any())
+                        {
+                            foreach (var w in Model.Weights)
+                            {
+                                <tr>
+                                    <td class="text-center">@w.WeightId</td>
+                                    <td class="text-center fw-bold">@w.WeightValue</td>
+                                    <td class="text-center">@w.Unit</td>
+                                    <td class="text-center">
+                                        @if (User.IsInRole("Admin")){
+
+                                        <div class="btn-group" role="group">
+                                            <a asp-controller="Weights" asp-action="Edit" asp-route-id="@w.WeightId" class="btn btn-warning btn-sm">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+
+                                                <button type="button"
+                                                class="btn btn-danger btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#deleteWeightModal"
+                                                    data-weight-id="@w.WeightId"
+                                                    data-weight-val="@w.WeightValue @w.Unit"
+                                                    title="Видалити">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="4" class="text-center py-4 text-muted">Список порожній</td></tr>
                         }
                     </tbody>
                 </table>
@@ -284,15 +357,17 @@
                                             <a asp-controller="Products" asp-action="Edit" asp-route-id="@p.ProductId" class="btn btn-warning btn-sm" title="Редагувати">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                            <button type="button"
-                                                    class="btn btn-danger btn-sm"
+                                            @if (User.IsInRole("Admin"))
+                                            {
+                                                <button type="button"
+                                                class="btn btn-danger btn-sm"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#deleteProductModal"
                                                     data-product-id="@p.ProductId"
                                                     data-product-name="@p.Name"
                                                     title="Видалити">
                                                 <i class="bi bi-trash"></i>
-                                            </button>
+                                            </button>}
                                         </div>
                                     </td>
                                 </tr>
@@ -394,9 +469,8 @@
                                             <a asp-controller="Variants" asp-action="Edit" asp-route-id="@v.VariantId" class="btn btn-warning btn-sm" title="Редагувати">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-
-                                            <button type="button"
-                                                    class="btn btn-danger btn-sm"
+                                                <button type="button"
+                                                class="btn btn-danger btn-sm"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#deleteVariantModal"
                                                     data-variant-id="@v.VariantId"
@@ -486,7 +560,83 @@
                 </table>
             </div>
         </div>
+        <!--Користувачі-->
+        <div class="tab-pane fade" id="tabUsers" role="tabpanel">
+              @if (User.IsInRole("Admin"))
+              {
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Користувачі <span class="badge bg-secondary">@Model.TotalUsers</span></h3>
+                <a asp-controller="Users" asp-action="Create" class="btn btn-primary shadow-sm">
+                    <i class="bi bi-person-plus"></i> Додати
+                </a>
+            </div>
 
+            <div class="table-responsive shadow-sm rounded">
+                <table class="table table-bordered table-striped table-hover align-middle mb-0">
+                    <thead class="table-primary text-center">
+                        <tr>
+                            <th>ID</th>
+                            <th>ПІБ</th>
+                            <th>Email</th>
+                            <th>Телефон</th>
+                            <th>Роль</th>
+                            <th>Реєстрація</th>
+                            <th>Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Users.Any())
+                        {
+                            foreach (var u in Model.Users)
+                            {
+                                <tr>
+                                    <td class="text-center">@u.UserId</td>
+                                    <td><strong>@u.FullName</strong></td>
+                                    <td>@u.Email</td>
+                                    <td>@u.Phone</td>
+                                    <td class="text-center">
+                                        <span class="badge @(u.Role == "Admin" ? "bg-danger" : "bg-info text-dark")">
+                                            @u.Role
+                                        </span>
+                                    </td>
+                                    <td class="text-center small">@u.CreatedAt?.ToShortDateString()</td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a asp-controller="Users" asp-action="Edit" asp-route-id="@u.UserId" class="btn btn-warning btn-sm">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-danger btn-sm"
+                                                    data-bs-toggle="modal" data-bs-target="#deleteUserModal"
+                                                    data-user-id="@u.UserId" data-user-name="@u.FullName">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="7" class="text-center py-4">Список порожній</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="bi bi-shield-lock-fill text-danger" style="font-size: 4rem;"></i>
+                    </div>
+                    <h3 class="text-danger fw-bold">Доступ заборонено</h3>
+                    <p class="text-muted lead">
+                        Перегляд списку користувачів доступний лише адміністраторам. </p>
+                </div>
+            }
+        </div>
+        
+      
         <!--АНАЛІТИКА-->
         <div class="tab-pane fade" id="tabReports" role="tabpanel" aria-labelledby="reports-tab">
 
@@ -686,10 +836,10 @@
                             </table>
                         </div>
                     </div>
-                </div>
-
+                </div>                
             </div>
         </div>
+
 
 <!--МОДАЛЬНІ ВІКНА-->
 <!--Видалення Бренду -->
@@ -788,7 +938,53 @@
         </div>
     </div>
 </div>
-
+<!--Видалення Ваги-->
+<div class="modal fade" id="deleteWeightModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Видалення Ваги</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Ви впевнені, що хочете видалити цей запис?</p>
+                <h4 class="text-center text-danger" id="deleteWeightInfo"></h4>
+                <div class="alert alert-warning mt-3 small">
+                    <i class="bi bi-info-circle"></i> Видалення неможливе, якщо є товари з такою вагою.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                <form id="deleteWeightForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Видалити</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Видалення Користувача-->
+<div class="modal fade" id="deleteUserModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Видалення Користувача</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p>Ви дійсно хочете видалити користувача?</p>
+                <h4 class="text-danger" id="deleteUserName"></h4>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ні</button>
+                <form id="deleteUserForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Так, видалити</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -840,14 +1036,36 @@
         }
 
         const deleteTypeModal = document.getElementById('deleteTypeModal');
-    if (deleteTypeModal) {
-        deleteTypeModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;        
-            const id = button.getAttribute('data-type-id');
-            const name = button.getAttribute('data-type-name');
-            document.getElementById('deleteTypeName').textContent = name;      
-            document.getElementById('deleteTypeForm').action = '/Types/Delete/' + id;
-        });
-    }
+        if (deleteTypeModal) {
+            deleteTypeModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-type-id');
+                const name = button.getAttribute('data-type-name');
+                document.getElementById('deleteTypeName').textContent = name;
+                document.getElementById('deleteTypeForm').action = '/Types/Delete/' + id;
+            });
+        }
+    
+    const deleteWeightModal = document.getElementById('deleteWeightModal');
+        if (deleteWeightModal) {
+            deleteWeightModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-weight-id');
+                const info = button.getAttribute('data-weight-val');
+
+                document.getElementById('deleteWeightInfo').textContent = info;
+                document.getElementById('deleteWeightForm').action = '/Weights/Delete/' + id;
+            });
+        }
+    const deleteUserModal = document.getElementById('deleteUserModal');
+        if (deleteUserModal) {
+            deleteUserModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-user-id');
+                const name = button.getAttribute('data-user-name');
+                document.getElementById('deleteUserName').textContent = name;
+                document.getElementById('deleteUserForm').action = '/Users/Delete/' + id;
+                });
+        }
     </script>
 }

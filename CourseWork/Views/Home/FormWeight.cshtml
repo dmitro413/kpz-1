@@ -1,0 +1,64 @@
+﻿@model CourseWork.Models.Weight
+
+@{
+    bool isEdit = Model != null && Model.WeightId > 0;
+    ViewBag.Title = isEdit ? "Редагування ваги" : "Додати нову вагу";
+    string action = isEdit ? "Edit" : "Create";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0">@ViewBag.Title</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-controller="Weights" asp-action="@action" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        @if (isEdit)
+                        {
+                            <input type="hidden" asp-for="WeightId" />
+                        }
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label asp-for="WeightValue" class="form-label">Значення</label>
+                                <input asp-for="WeightValue" type="number" step="0.01" class="form-control" placeholder="100" />
+                                <span asp-validation-for="WeightValue" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Unit" class="form-label">Одиниця</label>
+                                <select asp-for="Unit" class="form-select">
+                                    <option value="г">г (грами)</option>
+                                    <option value="кг">кг (кілограми)</option>
+                                    <option value="мл">мл (мілілітри)</option>
+                                    <option value="л">л (літри)</option>
+                                    <option value="шт">шт (штуки)</option>
+                                </select>
+                                <span asp-validation-for="Unit" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between pt-3">
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Назад
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-lg"></i> Зберегти
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -3,9 +3,11 @@ using CourseWork.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization; 
 
 namespace CourseWork.Controllers
 {
+    [Authorize(Roles = "Admin,Manager")] 
     public class ProductsController : Controller
     {
         private readonly UnitOfWork _unitOfWork;
@@ -16,14 +18,12 @@ namespace CourseWork.Controllers
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
         }
-
         [HttpGet]
         public async Task<IActionResult> Create()
         {
             await PopulateDropdowns();
             return View("~/Views/Home/FormProduct.cshtml", new Product());
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Product product, IFormFile imageFile)
@@ -49,7 +49,6 @@ namespace CourseWork.Controllers
             TempData["Success"] = $"Продукт '{product.Name}' створено.";
             return RedirectToAction("Index", "Home");
         }
-
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -59,7 +58,6 @@ namespace CourseWork.Controllers
             await PopulateDropdowns(product.BrandId, product.TypeOfProductId);
             return View("~/Views/Home/FormProduct.cshtml", product);
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Product product, IFormFile? imageFile)
@@ -112,7 +110,7 @@ namespace CourseWork.Controllers
             TempData["Success"] = "Продукт оновлено.";
             return RedirectToAction("Index", "Home");
         }
-
+        [Authorize(Roles = "Admin,Manager")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -139,7 +137,7 @@ namespace CourseWork.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(int id)
@@ -158,7 +156,7 @@ namespace CourseWork.Controllers
             
             return RedirectToAction("Index", "Home");
         }
-
+        [Authorize(Roles = "Admin")] 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> HardDelete(int id)

@@ -9,6 +9,10 @@ namespace CourseWork.Models
         public IEnumerable<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
         public IEnumerable<ProductBatch> Batches { get; set; } = new List<ProductBatch>();
         public IEnumerable<TypeOfProduct> Types { get; set; } = new List<TypeOfProduct>();
+        public IEnumerable<Weight> Weights { get; set; } = new List<Weight>();
+        public IEnumerable<User> Users { get; set; } = new List<User>();
+
+
 
         public List<BrandStatsDto> TopBrands { get; set; } = new();
         public List<LowStockProductDto> LowStockProducts { get; set; } = new();
@@ -19,7 +23,11 @@ namespace CourseWork.Models
         public int TotalProducts { get; set; }
         public int TotalVariants { get; set; }
         public int TotalBatches { get; set; }
-        public int TotalTypes { get; set; } 
+        public int TotalTypes { get; set; }
+        public int TotalWeights { get; set; }
+        public int TotalUsers { get; set; }
+
+
 
 
         public int CurrentPage { get; set; } = 1;

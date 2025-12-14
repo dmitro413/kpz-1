@@ -2,8 +2,7 @@
 using CourseWork.Models;
 using CourseWork.Repositories; 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CourseWork.Controllers
 {
@@ -58,7 +57,7 @@ namespace CourseWork.Controllers
 
             return View(product);
         }
-
+        [Authorize(Roles = "Customer")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddReview(int productId, int rating, string comment)

@@ -2,9 +2,12 @@
 using CourseWork.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CourseWork.Controllers
 {
+    [Authorize(Roles = "Admin,Manager")]
+
     public class BrandsController : Controller
     {
         private readonly UnitOfWork _unitOfWork;
@@ -13,13 +16,11 @@ namespace CourseWork.Controllers
         {
             _unitOfWork = unitOfWork;
         }
-
         [HttpGet]
         public IActionResult Create()
         {
             return View("~/Views/Home/FormBrand.cshtml", new Brand());
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Brand brand)
@@ -41,7 +42,6 @@ namespace CourseWork.Controllers
                 return View("~/Views/Home/FormBrand.cshtml", brand);
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -49,7 +49,6 @@ namespace CourseWork.Controllers
             if (brand == null) return NotFound();
             return View("~/Views/Home/FormBrand.cshtml", brand);
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Brand brand)
@@ -70,7 +69,7 @@ namespace CourseWork.Controllers
             TempData["Success"] = "Бренд оновлено.";
             return RedirectToAction("Index", "Home");
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)

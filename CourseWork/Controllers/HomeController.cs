@@ -2,9 +2,12 @@ using CourseWork.Data;
 using CourseWork.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization; 
 
 namespace CourseWork.Controllers
 {
+    [Authorize(Roles = "Admin,Manager")]
+
     public class HomeController : Controller
     {
         private readonly UnitOfWork _unitOfWork;
@@ -44,6 +47,11 @@ namespace CourseWork.Controllers
                 TotalBatches = await _unitOfWork.ProductBatches.CountAsync(),
                 Types = await _unitOfWork.TypeOfProducts.GetAllAsync(),
                 TotalTypes = await _unitOfWork.TypeOfProducts.CountAsync(),
+                Weights = await _unitOfWork.Weights.GetAllAsync(),
+                TotalWeights = await _unitOfWork.Weights.CountAsync(),
+                Users = await _unitOfWork.Users.GetPagedAsync(page, pageSize),
+                TotalUsers = await _unitOfWork.Users.CountAsync(),
+
 
                 CurrentPage = page,
                 PageSize = pageSize,

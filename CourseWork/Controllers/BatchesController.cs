@@ -1,11 +1,13 @@
 ﻿using CourseWork.Data;
 using CourseWork.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace CourseWork.Controllers
 {
+    [Authorize(Roles = "Admin,Manager")]
     public class BatchesController : Controller
     {
         private readonly UnitOfWork _unitOfWork;

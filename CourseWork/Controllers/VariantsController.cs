@@ -3,9 +3,11 @@ using CourseWork.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CourseWork.Controllers
 {
+    [Authorize(Roles = "Admin,Manager")]
     public class VariantsController : Controller
     {
         private readonly UnitOfWork _unitOfWork;
@@ -121,7 +123,6 @@ namespace CourseWork.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
-
 
         private async Task PopulateDropdowns(int? selectedProduct = null, int? selectedWeight = null)
         {

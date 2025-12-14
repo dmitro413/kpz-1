@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Вхід";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4>Вхід у систему</h4>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">@ViewBag.Error</div>
+                    }
+
+                    <form asp-action="Login" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input name="email" type="email" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Пароль</label>
+                            <input name="password" type="password" class="form-control" required />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Увійти</button>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <small>Немає акаунту? <a href="#">Зареєструватися</a></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

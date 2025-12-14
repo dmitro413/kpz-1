@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using CourseWork.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,14 @@ builder.Services.AddScoped<UnitOfWork>();
 
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login"; 
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+    });
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -29,7 +38,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization(); 
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Shop}/{action=Index}/{id?}");

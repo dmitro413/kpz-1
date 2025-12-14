@@ -7,81 +7,88 @@ using Microsoft.EntityFrameworkCore;
 namespace CourseWork.Controllers
 {
     [Authorize(Roles = "Admin,Manager")]
-    public class TypesController : Controller
+    public class WeightsController : Controller
     {
         private readonly UnitOfWork _unitOfWork;
 
-        public TypesController(UnitOfWork unitOfWork)
+        public WeightsController(UnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
+
         [HttpGet]
         public IActionResult Create()
         {
-            return View("~/Views/Home/FormType.cshtml", new TypeOfProduct());
+            return View("~/Views/Home/FormWeight.cshtml", new Weight());
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(TypeOfProduct type)
+        public async Task<IActionResult> Create(Weight weight)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    await _unitOfWork.TypeOfProducts.AddAsync(type);
+                    await _unitOfWork.Weights.AddAsync(weight);
                     await _unitOfWork.SaveAsync();
-                    TempData["Success"] = $"Тип '{type.TypeOfProductName}' створено.";
+                    TempData["Success"] = $"Вагу '{weight.WeightValue} {weight.Unit}' додано.";
                     return RedirectToAction("Index", "Home");
                 }
                 catch (DbUpdateException)
                 {
-                    ModelState.AddModelError("", "Такий тип продукту вже існує.");
+                    ModelState.AddModelError("", "Така вага вже існує.");
                 }
             }
-            return View("~/Views/Home/FormType.cshtml", type);
+            return View("~/Views/Home/FormWeight.cshtml", weight);
         }
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var type = await _unitOfWork.TypeOfProducts.GetByIdAsync(id);
-            if (type == null) return NotFound();
-            return View("~/Views/Home/FormType.cshtml", type);
+            var weight = await _unitOfWork.Weights.GetByIdAsync(id);
+            if (weight == null) return NotFound();
+            return View("~/Views/Home/FormWeight.cshtml", weight);
         }
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(TypeOfProduct type)
+        public async Task<IActionResult> Edit(Weight weight)
         {
             if (ModelState.IsValid)
             {
-                var existing = await _unitOfWork.TypeOfProducts.GetByIdAsync(type.TypeOfProductId);
+                var existing = await _unitOfWork.Weights.GetByIdAsync(weight.WeightId);
                 if (existing != null)
                 {
-                    existing.TypeOfProductName = type.TypeOfProductName;
-                    _unitOfWork.TypeOfProducts.Update(existing);
+                    existing.WeightValue = weight.WeightValue;
+                    existing.Unit = weight.Unit;
+
+                    _unitOfWork.Weights.Update(existing);
                     await _unitOfWork.SaveAsync();
-                    TempData["Success"] = "Тип продукту оновлено.";
+
+                    TempData["Success"] = "Вагу оновлено.";
                     return RedirectToAction("Index", "Home");
                 }
             }
-            return View("~/Views/Home/FormType.cshtml", type);
+            return View("~/Views/Home/FormWeight.cshtml", weight);
         }
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var type = await _unitOfWork.TypeOfProducts.GetByIdAsync(id);
-            if (type != null)
+            var weight = await _unitOfWork.Weights.GetByIdAsync(id);
+            if (weight != null)
             {
                 try
                 {
-                    _unitOfWork.TypeOfProducts.Remove(type);
+                    _unitOfWork.Weights.Remove(weight);
                     await _unitOfWork.SaveAsync();
-                    TempData["Success"] = "Тип продукту видалено.";
+                    TempData["Success"] = "Вагу видалено.";
                 }
                 catch (DbUpdateException)
                 {
-                    TempData["Error"] = "Неможливо видалити: цей тип використовується в товарах.";
+                    TempData["Error"] = "Неможливо видалити: ця вага використовується в товарах.";
                 }
             }
             return RedirectToAction("Index", "Home");

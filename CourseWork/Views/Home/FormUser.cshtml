@@ -1,0 +1,94 @@
+﻿@model CourseWork.Models.User
+@using System.Security.Claims
+
+@{
+    bool isEdit = Model != null && Model.UserId > 0;
+    ViewBag.Title = isEdit ? "Редагування користувача" : "Новий користувач";
+    string action = isEdit ? "Edit" : "Create";
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    bool isSelf = isEdit && currentUserId != null && currentUserId == Model.UserId.ToString();
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">@ViewBag.Title</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-controller="Users" asp-action="@action" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        @if (isEdit)
+                        {
+                            <input type="hidden" asp-for="UserId" />
+                        }
+
+                        <div class="mb-3">
+                            <label asp-for="FullName" class="form-label">ПІБ</label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Email" class="form-label">Email</label>
+                                <input asp-for="Email" type="email" class="form-control" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Phone" class="form-label">Телефон</label>
+                                <input asp-for="Phone" class="form-control" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Role" class="form-label">Роль</label>
+                                @if (isSelf)
+                                {
+                                    <select asp-for="Role" class="form-select" disabled>
+                                        <option value="Admin">Адміністратор (Admin)</option>
+                                        <option value="Manager">Менеджер</option>
+                                        <option value="Customer">Покупець</option>
+                                    </select>
+                                    <input type="hidden" asp-for="Role" />
+                                    <small class="text-muted"><i class="bi bi-lock-fill"></i> Ви не можете змінити власну роль.</small>
+                                }
+                                else
+                                {
+                                    <select asp-for="Role" class="form-select">
+                                        <option value="Admin">Адміністратор (Admin)</option>
+                                        <option value="Manager">Менеджер</option>
+                                        <option value="Customer">Покупець (Customer)</option>
+                                    </select>
+                                }
+                            </div>
+                            @if (!isEdit)
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="PasswordHash" class="form-label">Початковий пароль</label>
+                                    <input asp-for="PasswordHash" type="password" class="form-control" required />
+                                    <span asp-validation-for="PasswordHash" class="text-danger"></span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted">Пароль</label>
+                                    <input type="text" class="form-control" value="********" disabled readonly />
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-flex justify-content-between pt-3">
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Скасувати</a>
+                            <button type="submit" class="btn btn-success">Зберегти</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
