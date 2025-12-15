@@ -1,7 +1,7 @@
 ﻿@model CourseWork.Models.Product
 @{
     ViewData["Title"] = Model.Name;
-    Layout = "~/Views/Shared/_LayoutShop.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 
     var variants = Model.ProductVariants.OrderBy(v => v.Price).ToList();
     var defaultVariant = variants.FirstOrDefault(v => v.ProductBatches.Sum(b => b.Stock) > 0) ?? variants.FirstOrDefault();

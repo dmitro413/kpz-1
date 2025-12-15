@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "OCqDB/2+ZzWPKteKQGmnTtwonqxYPGMIYZeK3/G78rg=",
+  "Hash": "zR8soC02Uaz9+rtbf5viZuNAJq/2d6TSjMDvOukiOTA=",
   "Source": "CourseWork",
   "BasePath": "_content/CourseWork",
   "Mode": "Default",
@@ -91,6 +91,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\favicon.ico"
+    },
+    {
+      "Identity": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\0110e307-cb81-42b2-987d-cefc349d5fca.png",
+      "SourceId": "CourseWork",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\",
+      "BasePath": "_content/CourseWork",
+      "RelativePath": "images/products/0110e307-cb81-42b2-987d-cefc349d5fca.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\products\\0110e307-cb81-42b2-987d-cefc349d5fca.png"
     },
     {
       "Identity": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\5ffe583b-b751-42e2-8675-483d434ac7f3.jpg",

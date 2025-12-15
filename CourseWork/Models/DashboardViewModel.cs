@@ -11,7 +11,7 @@ namespace CourseWork.Models
         public IEnumerable<TypeOfProduct> Types { get; set; } = new List<TypeOfProduct>();
         public IEnumerable<Weight> Weights { get; set; } = new List<Weight>();
         public IEnumerable<User> Users { get; set; } = new List<User>();
-
+        public IEnumerable<Review> Reviews { get; set; } = new List<Review>();
 
 
         public List<BrandStatsDto> TopBrands { get; set; } = new();
@@ -26,6 +26,8 @@ namespace CourseWork.Models
         public int TotalTypes { get; set; }
         public int TotalWeights { get; set; }
         public int TotalUsers { get; set; }
+        public int TotalReviews { get; set; }
+
 
 
 

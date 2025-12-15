@@ -75,6 +75,7 @@ namespace CourseWork.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(User user)
         {
             ModelState.Remove("PasswordHash");
@@ -83,9 +84,10 @@ namespace CourseWork.Controllers
             {
                 if (!Regex.IsMatch(user.Phone, @"^\+380\d{9}$"))
                 {
-                    ModelState.AddModelError("Phone", "Невірний формат.");
+                    ModelState.AddModelError("Phone", "Невірний формат. Приклад: +380501234567");
                 }
             }
+
             if (ModelState.IsValid)
             {
                 var existing = await _unitOfWork.Users.GetByIdAsync(user.UserId);
@@ -96,7 +98,7 @@ namespace CourseWork.Controllers
                     var userWithSameEmail = await _unitOfWork.Users.GetByEmailAsync(user.Email);
                     if (userWithSameEmail != null)
                     {
-                        ModelState.AddModelError("Email", "Цей Email вже зайнятий іншим користувачем.");
+                        ModelState.AddModelError("Email", "Цей Email вже зайнятий.");
                         return View("~/Views/Home/FormUser.cshtml", user);
                     }
                 }
@@ -107,9 +109,7 @@ namespace CourseWork.Controllers
 
                 var currentUserIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                if (currentUserIdStr != null && int.Parse(currentUserIdStr) == user.UserId)
-                {}
-                else
+                if (currentUserIdStr == null || int.Parse(currentUserIdStr) != user.UserId)
                 {
                     existing.Role = user.Role;
                 }
@@ -122,12 +122,11 @@ namespace CourseWork.Controllers
                     TempData["Success"] = "Користувача успішно оновлено.";
                     return RedirectToAction("Index", "Home");
                 }
-                catch (DbUpdateException ex)
+                catch (DbUpdateException)
                 {
-                    ModelState.AddModelError("", "Помилка бази даних: не вдалося зберегти зміни.");
+                    ModelState.AddModelError("", "Помилка бази даних.");
                 }
             }
-
             return View("~/Views/Home/FormUser.cshtml", user);
         }
 
@@ -135,6 +134,16 @@ namespace CourseWork.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
+            var currentUserIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(currentUserIdStr, out int currentUserId))
+            {
+                if (currentUserId == id)
+                {
+                    TempData["Error"] = "Ви не можете видалити власний акаунт.";
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+
             var user = await _unitOfWork.Users.GetByIdAsync(id);
             if (user != null)
             {
@@ -151,6 +160,6 @@ namespace CourseWork.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
-        
+
     }
 }

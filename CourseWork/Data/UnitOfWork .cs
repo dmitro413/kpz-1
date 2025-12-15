@@ -15,6 +15,8 @@ namespace CourseWork.Data
         public ProductBatchRepository ProductBatches { get; } 
         public ReviewRepository Reviews { get; }
         public UserRepository Users { get; }
+        public OrderRepository Orders { get; }
+
 
         public UnitOfWork(MyDbContext context)
         {
@@ -26,7 +28,8 @@ namespace CourseWork.Data
             Weights = new WeightRepository(_context);
             ProductBatches = new ProductBatchRepository(_context); 
             Reviews = new ReviewRepository(_context);
-            Users = new UserRepository(_context); 
+            Users = new UserRepository(_context);
+            Orders = new OrderRepository(_context);
         }
 
         public async Task SaveAsync()

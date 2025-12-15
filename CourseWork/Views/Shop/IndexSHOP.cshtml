@@ -66,18 +66,19 @@
         </div>
 
         <div class="col-md-2">
-            <select name="minRating" class="form-select text-warning fw-bold bg-white">
-                <option value="" class="text-dark">Будь-який рейтинг</option>
-                <option value="5" selected="@(ViewBag.CurrentRating == 5)">⭐⭐⭐⭐⭐ (5)</option>
-                <option value="4" selected="@(ViewBag.CurrentRating == 4)">⭐⭐⭐⭐ (4+)</option>
-                <option value="3" selected="@(ViewBag.CurrentRating == 3)">⭐⭐⭐ (3+)</option>
-                <option value="1" selected="@(ViewBag.CurrentRating == 1)">⭐ (1+)</option>
+            <select name="minRating" class="form-select fw-bold text-success">
+                <option value="" class="text-dark">Всі товари</option>
+                <option value="1" selected="@(ViewBag.CurrentRating == 1)">Позитивні (>0)</option>
+                <option value="5" selected="@(ViewBag.CurrentRating == 5)">Популярні (>5)</option>
+                <option value="10" selected="@(ViewBag.CurrentRating == 10)">Топ (>10)</option>
+                <option value="50" selected="@(ViewBag.CurrentRating == 50)">Хіти (>50)</option>
             </select>
         </div>
 
         <div class="col-md-2">
             <select name="sortOrder" class="form-select">
                 <option value="newest" selected="@(ViewBag.CurrentSort == "newest")">Новинки</option>
+                <option value="rating" selected="@(ViewBag.CurrentSort == "rating")">Популярні</option> 
                 <option value="price_asc" selected="@(ViewBag.CurrentSort == "price_asc")">Дешевші</option>
                 <option value="price_desc" selected="@(ViewBag.CurrentSort == "price_desc")">Дорожчі</option>
             </select>
@@ -102,7 +103,16 @@
         {
             <div class="col">
                 <div class="card h-100 product-card p-2 position-relative">
+                    @if (p.AggregateRating != 0)
+                    {
+                        var badgeClass = p.AggregateRating > 0 ? "bg-success" : "bg-danger";
+                        var iconClass = p.AggregateRating > 0 ? "bi-hand-thumbs-up-fill" : "bi-hand-thumbs-down-fill";
 
+                        <div class="position-absolute top-0 end-0 m-2 px-2 py-1 @badgeClass text-white rounded small fw-bold shadow-sm"
+                             style="z-index: 10; opacity: 0.9;">
+                            <i class="bi @iconClass"></i> @p.AggregateRating
+                        </div>
+                    }
                     <a asp-controller="Shop" asp-action="Details" asp-route-id="@p.ProductId" class="text-center mb-2 d-block">
                         <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "/images/no-image.png" : p.ImageUrl)"
                              class="img-fluid" style="height: 160px; object-fit: contain;" alt="@p.Name">

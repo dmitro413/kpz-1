@@ -1,5 +1,6 @@
 ﻿@using CourseWork.Models
 @using System.Linq
+@using System.Security.Claims 
 @model CourseWork.Models.DashboardViewModel
 @{
     ViewData["Title"] = "База даних магазину";
@@ -61,12 +62,15 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#tabReviews" type="button" role="tab">
+                <i class="bi bi-chat-quote"></i> Відгуки
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#tabReports" type="button" role="tab">
                 <i class="bi bi-graph-up-arrow"></i> Звіти
             </button>
         </li>
-       
-
     </ul>
 
     <div class="tab-content pt-4" id="myTabContent">
@@ -589,8 +593,11 @@
                         {
                             foreach (var u in Model.Users)
                             {
-                                <tr>
-                                    <td class="text-center">@u.UserId</td>
+                                    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                                    bool isSelf = currentUserId == u.UserId.ToString();
+
+                                    <tr>
+                                        <td class="text-center">@u.UserId</td>
                                     <td><strong>@u.FullName</strong></td>
                                     <td>@u.Email</td>
                                     <td>@u.Phone</td>
@@ -605,11 +612,14 @@
                                             <a asp-controller="Users" asp-action="Edit" asp-route-id="@u.UserId" class="btn btn-warning btn-sm">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                            <button type="button" class="btn btn-danger btn-sm"
-                                                    data-bs-toggle="modal" data-bs-target="#deleteUserModal"
-                                                    data-user-id="@u.UserId" data-user-name="@u.FullName">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
+                                                @if (!isSelf)
+                                                {
+                                                    <button type="button" class="btn btn-danger btn-sm"
+                                                            data-bs-toggle="modal" data-bs-target="#deleteUserModal"
+                                                            data-user-id="@u.UserId" data-user-name="@u.FullName">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                }
                                         </div>
                                     </td>
                                 </tr>
@@ -631,7 +641,90 @@
                     </div>
                     <h3 class="text-danger fw-bold">Доступ заборонено</h3>
                     <p class="text-muted lead">
-                        Перегляд списку користувачів доступний лише адміністраторам. </p>
+                        Перегляд списку користувачів доступний лише адміністрації.
+                    </p>
+                </div>
+            }
+        </div>
+        <!--ВІДГУКИ-->
+        <div class="tab-pane fade" id="tabReviews" role="tabpanel" aria-labelledby="review-tab">
+            @if (User.IsInRole("Admin")){
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Модерація відгуків <span class="badge bg-secondary">@Model.TotalReviews</span></h3>
+            </div>
+
+            <div class="table-responsive shadow-sm rounded">
+                <table class="table table-bordered table-striped table-hover align-middle mb-0">
+                    <thead class="table-light text-center">
+                        <tr>
+                            <th style="width: 50px;">ID</th>
+                            <th style="width: 150px;">Користувач</th>
+                            <th style="width: 200px;">Товар</th>
+                            <th style="width: 100px;">Оцінка</th>
+                            <th>Коментар</th>
+                            <th style="width: 100px;">Дата</th>
+                            <th style="width: 80px;">Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Reviews.Any())
+                        {
+                            foreach (var r in Model.Reviews)
+                            {
+                                <tr>
+                                    <td class="text-center text-muted small">@r.ReviewId</td>
+                                    <td>
+                                        <i class="bi bi-person"></i> @(r.User?.FullName ?? "Анонім")
+                                        <br /><small class="text-muted">@r.User?.Email</small>
+                                    </td>
+                                    <td>
+                                        <a asp-controller="Shop" asp-action="Details" asp-route-id="@r.ProductId" target="_blank" class="text-decoration-none">
+                                            @(r.Product?.Name ?? "Товар видалено")
+                                        </a>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (r.Rating > 0)
+                                        {
+                                            <span class="badge bg-success"><i class="bi bi-hand-thumbs-up-fill"></i> Лайк</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger"><i class="bi bi-hand-thumbs-down-fill"></i> Дизлайк</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <small>@r.Comment</small>
+                                    </td>
+                                    <td class="text-center small">@r.CreatedAt?.ToShortDateString()</td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                                data-bs-toggle="modal" data-bs-target="#deleteReviewModal"
+                                                data-review-id="@r.ReviewId"
+                                                title="Видалити відгук">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="7" class="text-center py-4 text-muted">Відгуків немає</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="bi bi-shield-lock-fill text-danger" style="font-size: 4rem;"></i>
+                    </div>
+                    <h3 class="text-danger fw-bold">Доступ заборонено</h3>
+                    <p class="text-muted lead">
+                        Перегляд списку відгуків доступний лише адміністрації.
+                    </p>
                 </div>
             }
         </div>
@@ -985,6 +1078,28 @@
         </div>
     </div>
 </div>
+<!--Видалення Відгуку-->
+<div class="modal fade" id="deleteReviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Видалення Відгуку</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p>Ви впевнені, що хочете видалити цей коментар?</p>
+                <p class="text-muted small">Дія незворотна. Рейтинг товару буде перераховано.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                <form id="deleteReviewForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">Видалити</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -1065,6 +1180,14 @@
                 const name = button.getAttribute('data-user-name');
                 document.getElementById('deleteUserName').textContent = name;
                 document.getElementById('deleteUserForm').action = '/Users/Delete/' + id;
+                });
+        }
+    const deleteReviewModal = document.getElementById('deleteReviewModal');
+        if (deleteReviewModal) {
+                deleteReviewModal.addEventListener('show.bs.modal', function (event) {
+               const button = event.relatedTarget;
+               const id = button.getAttribute('data-review-id');
+               document.getElementById('deleteReviewForm').action = '/Reviews/Delete/' + id;
                 });
         }
     </script>

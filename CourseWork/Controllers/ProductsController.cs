@@ -124,7 +124,7 @@ namespace CourseWork.Controllers
                     await _unitOfWork.SaveAsync();
                     
                     TempData["Success"] = "Продукт видалено (soft delete).";      
-                    //DeleteImageFile(product.ImageUrl);
+                    DeleteImageFile(product.ImageUrl);
                 }
                 catch (DbUpdateException ex)
                 {

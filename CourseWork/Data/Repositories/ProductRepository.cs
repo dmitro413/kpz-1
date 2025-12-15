@@ -163,7 +163,7 @@ namespace CourseWork.Repositories
                 .Include(p => p.Brand)
                 .Include(p => p.TypeOfProduct)
                 .Include(p => p.ProductVariants).ThenInclude(v => v.Weight)
-                .Include(p => p.ProductVariants).ThenInclude(v => v.ProductBatches) 
+                .Include(p => p.ProductVariants).ThenInclude(v => v.ProductBatches)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
@@ -175,11 +175,26 @@ namespace CourseWork.Repositories
 
             query = sortOrder switch
             {
-                "price_asc" => query.OrderBy(p => p.ProductVariants.Min(v => v.Price)),
-                "price_desc" => query.OrderByDescending(p => p.ProductVariants.Min(v => v.Price)),
-                "rating" => query.OrderByDescending(p => p.AggregateRating),
-                "newest" => query.OrderByDescending(p => p.CreatedAt),
-                _ => query.OrderBy(p => p.Name)
+                "price_asc" => query
+                    .OrderByDescending(p => p.ProductVariants.SelectMany(v => v.ProductBatches).Sum(b => b.Stock) > 0)
+                    .ThenBy(p => p.ProductVariants.Any() ? p.ProductVariants.Min(v => v.Price) : decimal.MaxValue),
+
+                "price_desc" => query
+                    .OrderByDescending(p => p.ProductVariants.SelectMany(v => v.ProductBatches).Sum(b => b.Stock) > 0)
+                    .ThenByDescending(p => p.ProductVariants.Any() ? p.ProductVariants.Min(v => v.Price) : 0),
+
+                "rating" => query
+                    .OrderByDescending(p => p.ProductVariants.SelectMany(v => v.ProductBatches).Sum(b => b.Stock) > 0)
+                    .ThenByDescending(p => p.AggregateRating),
+
+                "newest" => query
+                    .OrderByDescending(p => p.ProductVariants.SelectMany(v => v.ProductBatches).Sum(b => b.Stock) > 0)
+                    .ThenByDescending(p => p.CreatedAt),
+
+                _ => query
+                    .OrderByDescending(p => p.ProductVariants.SelectMany(v => v.ProductBatches).Sum(b => b.Stock) > 0)
+                    .ThenBy(p => p.Name)
+
             };
 
             return await query.ToListAsync();

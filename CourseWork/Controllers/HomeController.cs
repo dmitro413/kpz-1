@@ -51,6 +51,8 @@ namespace CourseWork.Controllers
                 TotalWeights = await _unitOfWork.Weights.CountAsync(),
                 Users = await _unitOfWork.Users.GetPagedAsync(page, pageSize),
                 TotalUsers = await _unitOfWork.Users.CountAsync(),
+                Reviews = await _unitOfWork.Reviews.GetPagedAsync(page, pageSize),
+                TotalReviews = await _unitOfWork.Reviews.CountAsync(),
 
 
                 CurrentPage = page,

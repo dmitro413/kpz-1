@@ -1,0 +1,81 @@
+﻿@model CourseWork.Models.User
+@{
+    ViewData["Title"] = "Мій профіль";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2><i class="bi bi-person-circle"></i> Мій кабінет</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a asp-action="Index" class="list-group-item list-group-item-action active">
+                    <i class="bi bi-person"></i> Особисті дані
+                </a>
+                <a asp-action="Orders" class="list-group-item list-group-item-action">
+                    <i class="bi bi-box-seam"></i> Мої замовлення
+                </a>
+            </div>
+        </div>
+        <div class="col-md-9">
+
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">Особиста інформація</div>
+                <div class="card-body">
+                    <form asp-action="UpdateInfo" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Email (Логін)</label>
+                            <input asp-for="Email" class="form-control" disabled readonly />
+                            <small class="text-muted">Email змінити неможливо.</small>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="FullName" class="form-label">ПІБ</label>
+                            <input asp-for="FullName" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Phone" class="form-label">Телефон</label>
+                            <input asp-for="Phone" class="form-control" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Зберегти дані</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">Зміна пароля</div>
+                <div class="card-body">
+                    <form action="/Profile/ChangePassword" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label">Старий пароль</label>
+                            <input name="OldPassword" type="password" class="form-control" required />
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Новий пароль</label>
+                                <input name="NewPassword" type="password" class="form-control" required minlength="6" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Повторіть новий</label>
+                                <input name="ConfirmPassword" type="password" class="form-control" required />
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-warning">Змінити пароль</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

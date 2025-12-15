@@ -1,0 +1,88 @@
+﻿@model IEnumerable<CourseWork.Models.Order>
+@{
+    ViewData["Title"] = "Мої замовлення";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2><i class="bi bi-box-seam"></i> Мої замовлення</h2>
+
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a asp-action="Index" class="list-group-item list-group-item-action">
+                    <i class="bi bi-person"></i> Особисті дані
+                </a>
+                <a asp-action="Orders" class="list-group-item list-group-item-action active">
+                    <i class="bi bi-box-seam"></i> Мої замовлення
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+
+            @if (Model.Any())
+            {
+                @foreach (var order in Model)
+                {
+                    string statusColor = order.StatusId switch
+                    {
+                        0 => "bg-primary",
+                        1 => "bg-warning text-dark",
+                        2 => "bg-info text-dark",
+                        3 => "bg-success", 
+                        4 => "bg-secondary",
+                        _ => "bg-light text-dark border"
+                    };
+
+                    <div class="card mb-3 shadow-sm border-0">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Замовлення #@order.OrderId</strong>
+                                <span class="text-muted small ms-2">від @order.OrderDate?.ToShortDateString()</span>
+                            </div>
+                            <span class="badge @statusColor rounded-pill">@order.Status?.StatusName</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <small class="text-muted d-block">Адреса доставки:</small>
+                                    <span>@(string.IsNullOrEmpty(order.DeliveryAddress) ? "Самовивіз" : order.DeliveryAddress)</span>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <small class="text-muted d-block">Сума замовлення:</small>
+                                    <span class="fs-5 fw-bold text-success">
+                                        @order.OrderDetails.Sum(od => od.Quantity * od.UnitPrice).ToString("N0") ₴
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="bg-light p-3 rounded">
+                                @foreach (var item in order.OrderDetails)
+                                {
+                                    <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2">
+                                        <div>
+                                            <span class="fw-bold">@item.Variant?.Product?.Name</span>
+                                            <small class="text-muted">(@item.Variant?.Weight?.WeightValue @item.Variant?.Weight?.Unit)</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span>@item.Quantity шт. x @item.UnitPrice.ToString("N0") ₴</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-cart-x fs-1 text-muted"></i>
+                    <h4 class="mt-3">У вас ще немає замовлень</h4>
+                    <a asp-controller="Shop" asp-action="Index" class="btn btn-primary mt-2">Перейти до покупок</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
