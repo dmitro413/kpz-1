@@ -19,11 +19,49 @@ namespace CourseWork.Repositories
                 .ToListAsync();
         }
  
-        public async Task<List<ExpiringBatchDto>> GetExpiringBatchesSPAsync(int days)
+        public async Task<IEnumerable<ProductBatch>> GetExpiringBatchesAsync(int days)
         {
-            return await _context.ExpiringBatches
-                .FromSqlInterpolated($"EXEC dbo.FindExpiringProductBatches @DaysUntilExpiry={days}")
+            var thresholdDate = DateOnly.FromDateTime(DateTime.Now.AddDays(days));
+
+            return await _context.ProductBatches
+                .Include(b => b.Variant).ThenInclude(v => v.Product).ThenInclude(p => p.Brand)
+                .Include(b => b.Variant).ThenInclude(v => v.Weight)
+                .Where(b => b.ExpiryDate <= thresholdDate && b.Stock > 0)
+                .OrderBy(b => b.ExpiryDate)
                 .ToListAsync();
+        }
+
+        public async Task DecreaseStockAsync(int variantId, int quantityNeeded)
+        {
+            var batches = await _context.ProductBatches
+                .Where(b => b.VariantId == variantId && b.Stock > 0)
+                .OrderBy(b => b.ManufactureDate)
+                .ToListAsync();
+
+            int remaining = quantityNeeded;
+
+            foreach (var batch in batches)
+            {
+                if (remaining <= 0) break;
+
+                if (batch.Stock >= remaining)
+                {
+                    batch.Stock -= remaining;
+                    remaining = 0;
+                }
+                else
+                {
+                    remaining -= batch.Stock;
+                    batch.Stock = 0;
+                }
+
+                _context.ProductBatches.Update(batch);
+            }
+
+            if (remaining > 0)
+            {
+                throw new Exception($"Недостатньо товару на складі! Не вистачає {remaining} шт.");
+            }
         }
     }
 }

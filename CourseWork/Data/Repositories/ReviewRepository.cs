@@ -18,5 +18,9 @@ namespace CourseWork.Repositories
                 .Take(pageSize)
                 .ToListAsync();
         }
+        public async Task<List<Review>> GetByUserIdAsync(int userId)
+        {
+            return await _dbSet.Where(r => r.UserId == userId).ToListAsync();
+        }
     }
 }

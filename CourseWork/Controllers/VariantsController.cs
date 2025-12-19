@@ -113,14 +113,26 @@ namespace CourseWork.Controllers
             var variant = await _unitOfWork.ProductVariants.GetByIdAsync(id);
             if (variant != null)
             {
-                _unitOfWork.ProductVariants.Remove(variant);
-                await _unitOfWork.SaveAsync();
-                TempData["Success"] = "Варіант видалено.";
+                try
+                {
+                    _unitOfWork.ProductVariants.Remove(variant);
+                    await _unitOfWork.SaveAsync();
+                    TempData["Success"] = "Варіант видалено.";
+                }
+                catch (Microsoft.EntityFrameworkCore.DbUpdateException)
+                {
+                    TempData["Error"] = "Неможливо видалити цей варіант, оскільки для нього існують партії на складі або замовлення.";
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] = "Сталася помилка при видаленні.";
+                }
             }
             else
             {
                 TempData["Error"] = "Варіант не знайдено.";
             }
+
             return RedirectToAction("Index", "Home");
         }
 

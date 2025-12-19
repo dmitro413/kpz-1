@@ -113,7 +113,7 @@ namespace CourseWork.Controllers
         [Authorize(Roles = "Admin,Manager")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id, bool showDeleted = false)
         {
             var product = await _unitOfWork.Products.GetByIdAsync(id);
             if (product != null)
@@ -124,7 +124,7 @@ namespace CourseWork.Controllers
                     await _unitOfWork.SaveAsync();
                     
                     TempData["Success"] = "Продукт видалено (soft delete).";      
-                    DeleteImageFile(product.ImageUrl);
+                    //DeleteImageFile(product.ImageUrl);
                 }
                 catch (DbUpdateException ex)
                 {
@@ -135,12 +135,12 @@ namespace CourseWork.Controllers
             {
                 TempData["Error"] = "Продукт не знайдено.";
             }
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Home", new { showDeleted = showDeleted });
         }
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Restore(int id)
+        public async Task<IActionResult> Restore(int id, bool showDeleted = false)
         {
             var restored = await _unitOfWork.Products.RestoreAsync(id);
             
@@ -153,8 +153,8 @@ namespace CourseWork.Controllers
             {
                 TempData["Error"] = "Продукт не знайдено або не був видалений.";
             }
-            
-            return RedirectToAction("Index", "Home");
+
+            return RedirectToAction("Index", "Home", new { showDeleted = showDeleted });
         }
         [Authorize(Roles = "Admin")] 
         [HttpPost]

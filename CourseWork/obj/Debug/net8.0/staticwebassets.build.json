@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "zR8soC02Uaz9+rtbf5viZuNAJq/2d6TSjMDvOukiOTA=",
+  "Hash": "T+zec7TNdi8vWtFMcv1SvMCLm67fUTHznH6rW9Rfgcw=",
   "Source": "CourseWork",
   "BasePath": "_content/CourseWork",
   "Mode": "Default",
@@ -93,12 +93,12 @@
       "OriginalItemSpec": "wwwroot\\favicon.ico"
     },
     {
-      "Identity": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\0110e307-cb81-42b2-987d-cefc349d5fca.png",
+      "Identity": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\no-image.png",
       "SourceId": "CourseWork",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\",
       "BasePath": "_content/CourseWork",
-      "RelativePath": "images/products/0110e307-cb81-42b2-987d-cefc349d5fca.png",
+      "RelativePath": "images/no-image.png",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
@@ -109,7 +109,26 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\images\\products\\0110e307-cb81-42b2-987d-cefc349d5fca.png"
+      "OriginalItemSpec": "wwwroot\\images\\no-image.png"
+    },
+    {
+      "Identity": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\4441f972-97dc-41cc-8d40-2107e4a96e9c.jpg",
+      "SourceId": "CourseWork",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\",
+      "BasePath": "_content/CourseWork",
+      "RelativePath": "images/products/4441f972-97dc-41cc-8d40-2107e4a96e9c.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\products\\4441f972-97dc-41cc-8d40-2107e4a96e9c.jpg"
     },
     {
       "Identity": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\5ffe583b-b751-42e2-8675-483d434ac7f3.jpg",
@@ -150,12 +169,12 @@
       "OriginalItemSpec": "wwwroot\\images\\products\\78063995-e9bd-4530-98bf-ddac46a48d74.jpg"
     },
     {
-      "Identity": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\8e5c6b5e-7c96-46d5-ba39-04c892e08ef6.jpg",
+      "Identity": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\d9f06e00-12fc-4af4-827f-553e109a43ef.png",
       "SourceId": "CourseWork",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\",
       "BasePath": "_content/CourseWork",
-      "RelativePath": "images/products/8e5c6b5e-7c96-46d5-ba39-04c892e08ef6.jpg",
+      "RelativePath": "images/products/d9f06e00-12fc-4af4-827f-553e109a43ef.png",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
@@ -166,45 +185,7 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\images\\products\\8e5c6b5e-7c96-46d5-ba39-04c892e08ef6.jpg"
-    },
-    {
-      "Identity": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\b60079b3-bf0f-41a4-9b0a-b1353943cf4d.jpg",
-      "SourceId": "CourseWork",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\",
-      "BasePath": "_content/CourseWork",
-      "RelativePath": "images/products/b60079b3-bf0f-41a4-9b0a-b1353943cf4d.jpg",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "PreferTarget",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\images\\products\\b60079b3-bf0f-41a4-9b0a-b1353943cf4d.jpg"
-    },
-    {
-      "Identity": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\d33b52e9-8b49-48a3-8a80-2ef721ca9c05.jpg",
-      "SourceId": "CourseWork",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\",
-      "BasePath": "_content/CourseWork",
-      "RelativePath": "images/products/d33b52e9-8b49-48a3-8a80-2ef721ca9c05.jpg",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "PreferTarget",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\images\\products\\d33b52e9-8b49-48a3-8a80-2ef721ca9c05.jpg"
+      "OriginalItemSpec": "wwwroot\\images\\products\\d9f06e00-12fc-4af4-827f-553e109a43ef.png"
     },
     {
       "Identity": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\js\\site.js",

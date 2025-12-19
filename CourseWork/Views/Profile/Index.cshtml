@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "Мій профіль";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    bool isStaff = User.IsInRole("Admin") || User.IsInRole("Manager");
+
 }
 
 <div class="container mt-4">
@@ -75,7 +77,53 @@
                     </form>
                 </div>
             </div>
+            @if (!isStaff)
+            {
+                <div class="card shadow-sm border-danger mt-5">
+                    <div class="card-header bg-danger text-white">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Видалення акаунту</h5>
+                        <p class="card-text text-muted">
+                            Ця дія незворотна. Ваші відгуки та історія заказів будуть видалені.
+                        </p>
 
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                            Видалити мій акаунт
+                        </button>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title">Видалення акаунту</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="fw-bold">Ви впевнені, що хочете видалити свій профіль?</p>
+                                <p>Доступ до акаунту буде втрачено назавжди.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+
+                                <form asp-action="DeleteAccount" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger">Так, видалити</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mt-5">
+                    <i class="bi bi-info-circle-fill"></i> Ви увійшли як співробітник (@Model.Role). Видалення робочого акаунту через цю форму неможливе.
+                </div>
+            }
         </div>
     </div>
 </div>

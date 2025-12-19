@@ -12,11 +12,12 @@ namespace CourseWork.Data
         public ProductVariantRepository ProductVariants { get; }
         public TypeOfProductRepository TypeOfProducts { get; }
         public WeightRepository Weights { get; }
-        public ProductBatchRepository ProductBatches { get; } 
+        public ProductBatchRepository ProductBatches { get; }
         public ReviewRepository Reviews { get; }
         public UserRepository Users { get; }
         public OrderRepository Orders { get; }
-
+        public OrderDetailRepository OrderDetails { get; }
+        public Repository<OrderStatus> OrderStatuses { get; }
 
         public UnitOfWork(MyDbContext context)
         {
@@ -26,10 +27,12 @@ namespace CourseWork.Data
             ProductVariants = new ProductVariantRepository(_context);
             TypeOfProducts = new TypeOfProductRepository(_context);
             Weights = new WeightRepository(_context);
-            ProductBatches = new ProductBatchRepository(_context); 
+            ProductBatches = new ProductBatchRepository(_context);
             Reviews = new ReviewRepository(_context);
             Users = new UserRepository(_context);
             Orders = new OrderRepository(_context);
+            OrderDetails = new OrderDetailRepository(_context);
+            OrderStatuses = new Repository<OrderStatus>(_context);
         }
 
         public async Task SaveAsync()

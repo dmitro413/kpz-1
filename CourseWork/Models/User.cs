@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace CourseWork.Models;
 
@@ -10,7 +11,7 @@ public partial class User
     public string FullName { get; set; } = null!;
 
     public string Email { get; set; } = null!;
-
+    [RegularExpression(@"^\+380\d{9}$", ErrorMessage = "Формат: +380xxxxxxxxx")]
     public string? Phone { get; set; }
 
     public string Role { get; set; } = null!;

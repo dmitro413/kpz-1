@@ -10,7 +10,7 @@ namespace CourseWork.Models
 
         [Required(ErrorMessage = "Введіть новий пароль")]
         [DataType(DataType.Password)]
-        [MinLength(6, ErrorMessage = "Мінімум 6 символів")]
+        [MinLength(8, ErrorMessage = "Мінімум 8 символів")]
         public string NewPassword { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Повторіть новий пароль")]

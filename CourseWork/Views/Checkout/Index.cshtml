@@ -1,0 +1,45 @@
+﻿@model CourseWork.Models.Order
+@{
+    ViewData["Title"] = "Оформлення замовлення";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-truck"></i> Оформлення доставки</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateOrder" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ваше ім'я</label>
+                            <input asp-for="CustomerName" class="form-control" required />
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Телефон</label>
+                                <input asp-for="CustomerPhone" class="form-control" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input asp-for="CustomerEmail" class="form-control" required />
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Адреса доставки (або Нова Пошта)</label>
+                            <textarea asp-for="DeliveryAddress" class="form-control" rows="3" required placeholder="м. Київ, вул. Хрещатик 1..."></textarea>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">Підтвердити замовлення</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

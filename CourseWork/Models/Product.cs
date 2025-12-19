@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace CourseWork.Models;
 
@@ -7,14 +8,15 @@ public partial class Product
 {
     public int ProductId { get; set; }
 
+    [Required(ErrorMessage = "Введіть назву товару")]
     public string Name { get; set; } = null!;
 
     public int TypeOfProductId { get; set; }
 
     public int BrandId { get; set; }
 
+    [Range(0, 5000, ErrorMessage = "Калорійність не може бути від'ємною")]
     public decimal CaloriesPer100g { get; set; }
-
     public string? Description { get; set; }
 
     public string? ImageUrl { get; set; }

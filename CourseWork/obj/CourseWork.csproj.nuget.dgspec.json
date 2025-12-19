@@ -63,6 +63,10 @@
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
               "version": "[8.0.11, )"
+            },
+            "PlantUml.Net": {
+              "target": "Package",
+              "version": "[1.4.80, )"
             }
           },
           "imports": [

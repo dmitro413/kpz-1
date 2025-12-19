@@ -12,24 +12,7 @@ namespace CourseWork.Repositories
         {
             _context = context;
         }
-        public async Task<IEnumerable<Product>> GetAllWithIncludesAsync()
-        {
-            return await _context.Products
-                .Where(p => !p.IsDeleted)
-                .Include(p => p.Brand)
-                .Include(p => p.TypeOfProduct)
-                .OrderByDescending(p => p.CreatedAt)
-                .ToListAsync();
-        }
-        public async Task<Product?> GetByIdWithIncludesAsync(int id)
-        {
-            return await _context.Products
-                .Where(p => !p.IsDeleted) 
-                .Include(p => p.Brand)
-                .Include(p => p.TypeOfProduct)
-                .FirstOrDefaultAsync(p => p.ProductId == id);
-        }
-
+        
         public override async Task<Product?> GetByIdAsync(int id)
         {
             return await _context.Products
@@ -42,12 +25,20 @@ namespace CourseWork.Repositories
              int pageSize,
              string? searchString = null,
              int? brandId = null,
-             int? typeId = null)
+             int? typeId = null, bool showDeleted = false)
         {
-            var query = _context.Products
-                .Include(p => p.Brand)
-                .Include(p => p.TypeOfProduct)
-                .AsQueryable();
+            var query = showDeleted
+        ? _context.Products.IgnoreQueryFilters().AsQueryable()
+        : _context.Products.AsQueryable();
+
+            if (showDeleted)
+            {
+                query = query.IgnoreQueryFilters();
+            }
+
+            query = query
+        .Include(p => p.Brand)
+        .Include(p => p.TypeOfProduct);
 
             if (!string.IsNullOrWhiteSpace(searchString))
                 query = query.Where(p => p.Name.Contains(searchString));
@@ -58,13 +49,15 @@ namespace CourseWork.Repositories
             if (typeId.HasValue)
                 query = query.Where(p => p.TypeOfProductId == typeId.Value);
 
+            query = query.OrderByDescending(p => p.UpdatedAt).ThenByDescending(p => p.ProductId);
+
+
             var totalCount = await query.CountAsync();
 
             var items = await query
-                .OrderByDescending(p => p.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync();
 
             return (items, totalCount);
         }
@@ -86,42 +79,7 @@ namespace CourseWork.Repositories
                 .Where(p => !p.IsDeleted)
                 .CountAsync();
         }
-        public async Task<IEnumerable<Product>> SearchByNameAsync(string searchTerm)
-        {
-            if (string.IsNullOrWhiteSpace(searchTerm))
-                return await GetAllWithIncludesAsync();
-
-            return await _context.Products
-                .Where(p => !p.IsDeleted)
-                .Include(p => p.Brand)
-                .Include(p => p.TypeOfProduct)
-                .Where(p => p.Name.Contains(searchTerm))
-                .OrderBy(p => p.Name)
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<Product>> GetByBrandIdAsync(int brandId)
-        {
-            return await _context.Products
-                .Where(p => !p.IsDeleted) 
-                .Include(p => p.Brand)
-                .Include(p => p.TypeOfProduct)
-                .Where(p => p.BrandId == brandId)
-                .OrderBy(p => p.Name)
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<Product>> GetByTypeIdAsync(int typeId)
-        {
-            return await _context.Products
-                .Where(p => !p.IsDeleted) 
-                .Include(p => p.Brand)
-                .Include(p => p.TypeOfProduct)
-                .Where(p => p.TypeOfProductId == typeId)
-                .OrderBy(p => p.Name)
-                .ToListAsync();
-        }
-
+        
         public async Task<IEnumerable<Product>> GetAllIncludingDeletedAsync()
         {
             return await _context.Products
@@ -151,14 +109,20 @@ namespace CourseWork.Repositories
             return await _context.Products
                 .Include(p => p.Brand)
                 .Include(p => p.TypeOfProduct)
-                .Include(p => p.ProductVariants).ThenInclude(v => v.Weight)
-                .Include(p => p.Reviews).ThenInclude(r => r.User) 
+                .Include(p => p.ProductVariants)
+                    .ThenInclude(v => v.Weight)
+                .Include(p => p.ProductVariants)
+                    .ThenInclude(v => v.ProductBatches)
+                .Include(p => p.Reviews)
+                    .ThenInclude(r => r.User)
                 .FirstOrDefaultAsync(p => p.ProductId == id);
         }
 
         public async Task<IEnumerable<Product>> GetShopProductsAsync(
     string searchString, int? brandId, int? typeId, string sortOrder)
         {
+            var minDate = DateOnly.FromDateTime(DateTime.Now.AddDays(7)); 
+
             var query = _context.Products
                 .Include(p => p.Brand)
                 .Include(p => p.TypeOfProduct)
@@ -176,24 +140,28 @@ namespace CourseWork.Repositories
             query = sortOrder switch
             {
                 "price_asc" => query
-                    .OrderByDescending(p => p.ProductVariants.SelectMany(v => v.ProductBatches).Sum(b => b.Stock) > 0)
-                    .ThenBy(p => p.ProductVariants.Any() ? p.ProductVariants.Min(v => v.Price) : decimal.MaxValue),
+           .OrderByDescending(p => p.ProductVariants.SelectMany(v => v.ProductBatches)
+               .Where(b => b.ExpiryDate > minDate)
+               .Sum(b => b.Stock) > 0)
+           .ThenBy(p => p.ProductVariants.Min(v => v.Price)),
 
                 "price_desc" => query
-                    .OrderByDescending(p => p.ProductVariants.SelectMany(v => v.ProductBatches).Sum(b => b.Stock) > 0)
+                    .OrderByDescending(p => p.ProductVariants.SelectMany(v => v.ProductBatches).Where(b => b.ExpiryDate > minDate).Sum(b => b.Stock) > 0)
                     .ThenByDescending(p => p.ProductVariants.Any() ? p.ProductVariants.Min(v => v.Price) : 0),
 
                 "rating" => query
-                    .OrderByDescending(p => p.ProductVariants.SelectMany(v => v.ProductBatches).Sum(b => b.Stock) > 0)
+                    .OrderByDescending(p => p.ProductVariants.SelectMany(v => v.ProductBatches).Where(b => b.ExpiryDate > minDate).Sum(b => b.Stock) > 0)
                     .ThenByDescending(p => p.AggregateRating),
 
                 "newest" => query
-                    .OrderByDescending(p => p.ProductVariants.SelectMany(v => v.ProductBatches).Sum(b => b.Stock) > 0)
+                    .OrderByDescending(p => p.ProductVariants.SelectMany(v => v.ProductBatches).Where(b => b.ExpiryDate > minDate).Sum(b => b.Stock) > 0)
                     .ThenByDescending(p => p.CreatedAt),
 
                 _ => query
-                    .OrderByDescending(p => p.ProductVariants.SelectMany(v => v.ProductBatches).Sum(b => b.Stock) > 0)
-                    .ThenBy(p => p.Name)
+            .OrderByDescending(p => p.ProductVariants.SelectMany(v => v.ProductBatches)
+                .Where(b => b.ExpiryDate > minDate) 
+                .Sum(b => b.Stock) > 0)
+            .ThenBy(p => p.Name)
 
             };
 

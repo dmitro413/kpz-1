@@ -27,7 +27,6 @@ public partial class MyDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<Weight> Weights { get; set; }
     public virtual DbSet<LowStockProductDto> LowStockProducts { get; set; }
-    public virtual DbSet<ExpiringBatchDto> ExpiringBatches { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)=> optionsBuilder.UseSqlServer("Server=DESKTOP-2788V47;Database=SweetShop;Trusted_Connection=True;TrustServerCertificate=True;");

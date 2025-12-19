@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using System.Text.RegularExpressions;
 
 namespace CourseWork.Controllers
 {
@@ -32,13 +31,7 @@ namespace CourseWork.Controllers
             {
                 ModelState.AddModelError("PasswordHash", "Введіть пароль");
             }
-            if (!string.IsNullOrEmpty(user.Phone))
-            {
-                if (!Regex.IsMatch(user.Phone, @"^\+380\d{9}$"))
-                {
-                    ModelState.AddModelError("Phone", "Невірний формат.");
-                }
-            }
+          
 
             if (ModelState.IsValid)
             {
@@ -80,13 +73,7 @@ namespace CourseWork.Controllers
         {
             ModelState.Remove("PasswordHash");
 
-            if (!string.IsNullOrEmpty(user.Phone))
-            {
-                if (!Regex.IsMatch(user.Phone, @"^\+380\d{9}$"))
-                {
-                    ModelState.AddModelError("Phone", "Невірний формат. Приклад: +380501234567");
-                }
-            }
+           
 
             if (ModelState.IsValid)
             {
@@ -144,11 +131,31 @@ namespace CourseWork.Controllers
                 }
             }
 
+
+            var userOrders = await _unitOfWork.Orders.GetByUserIdAsync(id);
+            bool hasActiveOrders = userOrders.Any(o => o.StatusId != 3 && o.StatusId != 4);
+            if (hasActiveOrders)
+            {
+                TempData["Error"] = "Неможливо видалити користувача: у нього є замовлення в обробці або доставці.";
+                return RedirectToAction("Index", "Home");
+            }
+            
             var user = await _unitOfWork.Users.GetByIdAsync(id);
             if (user != null)
             {
                 try
                 {
+                    foreach (var order in userOrders)
+                    {
+                        order.UserId = null;
+                        _unitOfWork.Orders.Update(order);
+                    }
+                    var userReviews = await _unitOfWork.Reviews.GetByUserIdAsync(id);
+                    foreach (var review in userReviews)
+                    {
+                        _unitOfWork.Reviews.Remove(review);
+                    }
+
                     _unitOfWork.Users.Remove(user);
                     await _unitOfWork.SaveAsync();
                     TempData["Success"] = "Користувача видалено.";

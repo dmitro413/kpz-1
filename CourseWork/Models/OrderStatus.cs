@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace CourseWork.Models;
-
+﻿namespace CourseWork.Models;
 public partial class OrderStatus
 {
     public int StatusId { get; set; }

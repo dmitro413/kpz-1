@@ -13,8 +13,12 @@
       "PackagePath": "staticwebassets\\favicon.ico"
     },
     {
-      "Id": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\0110e307-cb81-42b2-987d-cefc349d5fca.png",
-      "PackagePath": "staticwebassets\\images\\products\\0110e307-cb81-42b2-987d-cefc349d5fca.png"
+      "Id": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\no-image.png",
+      "PackagePath": "staticwebassets\\images\\no-image.png"
+    },
+    {
+      "Id": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\4441f972-97dc-41cc-8d40-2107e4a96e9c.jpg",
+      "PackagePath": "staticwebassets\\images\\products\\4441f972-97dc-41cc-8d40-2107e4a96e9c.jpg"
     },
     {
       "Id": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\5ffe583b-b751-42e2-8675-483d434ac7f3.jpg",
@@ -25,16 +29,8 @@
       "PackagePath": "staticwebassets\\images\\products\\78063995-e9bd-4530-98bf-ddac46a48d74.jpg"
     },
     {
-      "Id": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\8e5c6b5e-7c96-46d5-ba39-04c892e08ef6.jpg",
-      "PackagePath": "staticwebassets\\images\\products\\8e5c6b5e-7c96-46d5-ba39-04c892e08ef6.jpg"
-    },
-    {
-      "Id": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\b60079b3-bf0f-41a4-9b0a-b1353943cf4d.jpg",
-      "PackagePath": "staticwebassets\\images\\products\\b60079b3-bf0f-41a4-9b0a-b1353943cf4d.jpg"
-    },
-    {
-      "Id": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\d33b52e9-8b49-48a3-8a80-2ef721ca9c05.jpg",
-      "PackagePath": "staticwebassets\\images\\products\\d33b52e9-8b49-48a3-8a80-2ef721ca9c05.jpg"
+      "Id": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\images\\products\\d9f06e00-12fc-4af4-827f-553e109a43ef.png",
+      "PackagePath": "staticwebassets\\images\\products\\d9f06e00-12fc-4af4-827f-553e109a43ef.png"
     },
     {
       "Id": "C:\\Users\\lenovo\\source\\repos\\CourseWork\\CourseWork\\wwwroot\\js\\site.js",

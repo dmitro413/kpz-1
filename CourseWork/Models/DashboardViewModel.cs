@@ -12,11 +12,13 @@ namespace CourseWork.Models
         public IEnumerable<Weight> Weights { get; set; } = new List<Weight>();
         public IEnumerable<User> Users { get; set; } = new List<User>();
         public IEnumerable<Review> Reviews { get; set; } = new List<Review>();
+        public IEnumerable<Order> Orders { get; set; } = new List<Order>();
+        public IEnumerable<OrderStatus> OrderStatuses { get; set; } = new List<OrderStatus>();
+        public IEnumerable<ProductBatch> ExpiringBatches { get; set; } = new List<ProductBatch>();
 
 
         public List<BrandStatsDto> TopBrands { get; set; } = new();
         public List<LowStockProductDto> LowStockProducts { get; set; } = new();
-        public List<ExpiringBatchDto> ExpiringBatches { get; set; } = new();
 
 
         public int TotalBrands { get; set; }
@@ -29,7 +31,7 @@ namespace CourseWork.Models
         public int TotalReviews { get; set; }
 
 
-
+        public bool ShowDeleted { get; set; }
 
 
         public int CurrentPage { get; set; } = 1;
@@ -42,7 +44,7 @@ namespace CourseWork.Models
 
         public int ReportDaysUntilExpiry { get; set; } = 30;
 
-        public int ReportTopCount { get; set; } = 5;      
+        public int ReportTopCount { get; set; } = 5;
         public int ReportLowStockThreshold { get; set; } = 10;
         public SelectList? BrandList { get; set; }
         public SelectList? TypeList { get; set; }

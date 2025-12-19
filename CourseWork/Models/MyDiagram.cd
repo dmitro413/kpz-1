@@ -1,0 +1,341 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="CourseWork.Controllers.AccountController">
+    <Position X="4" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAIAAAAAAAAgAAAAIAAAABAAAAAAAQAAAAAAA=</HashCode>
+      <FileName>Controllers\AccountController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Controllers.BatchesController">
+    <Position X="5.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAAAAAAAAAgAAAAAAAAEAAEACAAAAAAAAAAA=</HashCode>
+      <FileName>Controllers\BatchesController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Controllers.BrandsController">
+    <Position X="7.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAEAAEACAAAAAAAAAAA=</HashCode>
+      <FileName>Controllers\BrandsController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Controllers.CartController">
+    <Position X="2.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAEAAAgAABAAAAAAAAAAAAAGAAABAACA=</HashCode>
+      <FileName>Controllers\CartController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Controllers.CheckoutController">
+    <Position X="12.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAQAEAAAgAAAAAAAAAAAAAAAAEAAAAAAAA=</HashCode>
+      <FileName>Controllers\CheckoutController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Controllers.HomeController">
+    <Position X="9.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAEAAAAAAAA=</HashCode>
+      <FileName>Controllers\HomeController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Controllers.OrdersController">
+    <Position X="9.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Controllers\OrdersController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Controllers.ProductsController">
+    <Position X="4" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAIAAAAAEgACAAAAAAEAAEgCAAAAAAAAAIA=</HashCode>
+      <FileName>Controllers\ProductsController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Controllers.ProfileController">
+    <Position X="5.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAEAAgAAAAgAAAAAAAAAAAAABAAEAAQAAAAA=</HashCode>
+      <FileName>Controllers\ProfileController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Controllers.ReviewsController">
+    <Position X="11" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAEAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Controllers\ReviewsController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Controllers.ShopController">
+    <Position X="7.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAAABAAAAAgAAAAAAAAAAAAAAAAEAAAAAAAA=</HashCode>
+      <FileName>Controllers\ShopController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Controllers.TypesController">
+    <Position X="2.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAEAAEACAAAAAAAAAAA=</HashCode>
+      <FileName>Controllers\TypesController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Controllers.UsersController">
+    <Position X="12.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAEAAEACAAAAAAAAAAA=</HashCode>
+      <FileName>Controllers\UsersController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Controllers.VariantsController">
+    <Position X="9.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAEgAAAAAAAAEAAEACAAAAAAAAAAA=</HashCode>
+      <FileName>Controllers\VariantsController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Controllers.WeightsController">
+    <Position X="11" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAEAAEACAAAAAAAAAAA=</HashCode>
+      <FileName>Controllers\WeightsController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.Brand" Collapsed="true">
+    <Position X="9.75" Y="11" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAIAAABAAAAAAAAQAAQ=</HashCode>
+      <FileName>Models\Brand.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.BrandStatsDto" Collapsed="true">
+    <Position X="2.75" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQAAAAAABAQAAAAAABAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\BrandStatsDto.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.CartItem" Collapsed="true">
+    <Position X="4.5" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAQAAAAQAABAAAAAACAAAAAAAAQAAAAAAAgAAIAAA=</HashCode>
+      <FileName>Models\CartItem.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.ChangePasswordViewModel" Collapsed="true">
+    <Position X="6.25" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAABAAAAAAAEAAAAAAAAAAAAAAIAA=</HashCode>
+      <FileName>Models\ChangePasswordViewModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.DashboardViewModel" Collapsed="true">
+    <Position X="8" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgGBAnAAKAAAJAAAAAAAACIAAQCABAABEFABkAMBSA4=</HashCode>
+      <FileName>Models\DashboardViewModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.ExpiringBatchDto" Collapsed="true">
+    <Position X="9.75" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAAAAQAAAAIAAAAAAAAAIAAARAAAABAAAIAAA=</HashCode>
+      <FileName>Models\ExpiringBatchDto.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.LowStockProductDto" Collapsed="true">
+    <Position X="2.75" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAQBAAAAAAAAAQAAAAAAABAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\LowStockProductDto.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.Order" Collapsed="true">
+    <Position X="4.5" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>GAABAAAMBAAACAAABDAAAAgAQAAQAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Order.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.OrderDetail" Collapsed="true">
+    <Position X="6.25" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>MAEAAAAAAAAABAAAAAAAAAAAAACAAAAAAAAAgQAAAAA=</HashCode>
+      <FileName>Models\OrderDetail.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.OrderStatus" Collapsed="true">
+    <Position X="8" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAIAAAgAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\OrderStatus.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.Product" Collapsed="true">
+    <Position X="9.75" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAQEAAAAAgCAAAQCAAABQAAAAAAQAAAAAACQARAAA=</HashCode>
+      <FileName>Models\Product.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.ProductBatch" Collapsed="true">
+    <Position X="2.75" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAAAAADAAAECBAAAAAgACAAAAAAIABAAAAAAA=</HashCode>
+      <FileName>Models\ProductBatch.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.ProductVariant" Collapsed="true">
+    <Position X="4.5" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAACAAAAAQEADAAQADAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\ProductVariant.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.RegisterViewModel" Collapsed="true">
+    <Position X="6.25" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAIAAAAAAAAAAAAAAAAACAAAAIAAAIAA=</HashCode>
+      <FileName>Models\RegisterViewModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.Review" Collapsed="true">
+    <Position X="8" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAADAAAEAAAAAAAAACAAAAgAAAAAAAEAEAAAAAAAAAA=</HashCode>
+      <FileName>Models\Review.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.TypeOfProduct" Collapsed="true">
+    <Position X="9.75" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAACAAAAAQ=</HashCode>
+      <FileName>Models\TypeOfProduct.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.User" Collapsed="true">
+    <Position X="2.75" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAGAAEAAACAACIAAECAAAAgAAAAAAAAAAAAAIAAAAAA=</HashCode>
+      <FileName>Models\User.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Models.Weight" Collapsed="true">
+    <Position X="4.5" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAEAAAAAYAAAAAAAAAAAAAQAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Weight.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Repositories.Repository&lt;T&gt;" Collapsed="true">
+    <Position X="20.5" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAUAAAAAAAAABAAAAAAALAEAAAAAAAAAAAAAAAAAIAA=</HashCode>
+      <FileName>Data\Repositories\Repository.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Repositories.BrandRepository" Collapsed="true">
+    <Position X="19.5" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Repositories\Repository.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Repositories.ProductVariantRepository" Collapsed="true">
+    <Position X="24" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAAABAAAAAAAAAAAAAAAAAAAACAAAAAAAAAA=</HashCode>
+      <FileName>Data\Repositories\Repository.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Repositories.OrderDetailRepository" Collapsed="true">
+    <Position X="15" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Repositories\Repository.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Repositories.OrderStatusRepository" Collapsed="true">
+    <Position X="21.75" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Repositories\Repository.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Repositories.TypeOfProductRepository" Collapsed="true">
+    <Position X="26.25" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Repositories\Repository.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Repositories.WeightRepository" Collapsed="true">
+    <Position X="17.25" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Repositories\Repository.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Repositories.OrderRepository" Collapsed="true">
+    <Position X="14.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAQA=</HashCode>
+      <FileName>Data\Repositories\OrderRepository.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Repositories.ProductBatchRepository" Collapsed="true">
+    <Position X="19" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAACAA=</HashCode>
+      <FileName>Data\Repositories\ProductBatchRepository.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Repositories.ProductRepository" Collapsed="true">
+    <Position X="23.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQABAAggAICBAQAAAAACAAAAAAAAAAEAAAAAAAAYAA=</HashCode>
+      <FileName>Data\Repositories\ProductRepository.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Repositories.ReviewRepository" Collapsed="true">
+    <Position X="16.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Repositories\ReviewRepository.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Repositories.UserRepository" Collapsed="true">
+    <Position X="21.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Repositories\UserRepository.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Data.MyDbContext" Collapsed="true">
+    <Position X="22.5" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAGAAIQAQAAAQQBAAAAAAEQAAAAAAEEAAAAADQAQ=</HashCode>
+      <FileName>Data\MyDbContext.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CourseWork.Data.UnitOfWork" Collapsed="true">
+    <Position X="18.75" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAGAAACAABAAQQBAAAAAAAYAAAAAAAEAAAAADAAQ=</HashCode>
+      <FileName>Data\UnitOfWork .cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="CourseWork.Extensions.SessionExtensions" Collapsed="true">
+    <Position X="17" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAIAAAAgAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Extensions\SessionExtensions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

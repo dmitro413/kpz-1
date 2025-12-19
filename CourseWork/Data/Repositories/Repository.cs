@@ -75,6 +75,7 @@ namespace CourseWork.Repositories
         public async Task<List<BrandStatsDto>> GetTopBrandsByRevenueAsync(int count)
         {
             var rawData = await _context.OrderDetails
+                .IgnoreQueryFilters()
                 .Include(od => od.Variant).ThenInclude(v => v.Product).ThenInclude(p => p.Brand)
                 .Include(od => od.Variant).ThenInclude(v => v.ProductBatches)
                 .Where(od => od.Variant.Product.Brand != null) 
@@ -108,7 +109,7 @@ namespace CourseWork.Repositories
 
     }
 
-        public class ProductVariantRepository : Repository<ProductVariant>
+    public class ProductVariantRepository : Repository<ProductVariant>
     {
         public ProductVariantRepository(MyDbContext context) : base(context) { }
 
@@ -120,12 +121,27 @@ namespace CourseWork.Repositories
         public async Task<IEnumerable<ProductVariant>> GetVariantsWithDetailsAsync()
         {
             return await _dbSet
-                .Include(v => v.Product) 
-                .Include(v => v.Weight)  
+                .Include(v => v.Product)
+                .Include(v => v.Weight)
                 .OrderBy(v => v.Product.Name)
                 .ToListAsync();
         }
+
+        public async Task<int> GetTotalStockAsync(int variantId)
+        {
+            var today = DateOnly.FromDateTime(DateTime.Now);
+
+            return await _context.ProductBatches
+                .Where(b => b.VariantId == variantId && b.ExpiryDate > today)
+                .SumAsync(b => b.Stock);
+        }
+
     }
+public class OrderDetailRepository : Repository<OrderDetail>
+    {
+        public OrderDetailRepository(MyDbContext context) : base(context) { }
+    }
+    public class OrderStatusRepository : Repository<Order> { public OrderStatusRepository(MyDbContext c) : base(c) { } }
 
     public class TypeOfProductRepository : Repository<TypeOfProduct> { public TypeOfProductRepository(MyDbContext c) : base(c) { } }
     public class WeightRepository : Repository<Weight> { public WeightRepository(MyDbContext c) : base(c) { } }

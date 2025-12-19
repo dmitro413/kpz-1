@@ -14,7 +14,8 @@ namespace CourseWork.Models
         public string Email { get; set; } = string.Empty;
 
         [Display(Name = "Телефон")]
-        [Phone(ErrorMessage = "Некоректний номер телефону")]
+        [Required(ErrorMessage = "Введіть номер телефону")]
+        [RegularExpression(@"^\+380\d{9}$", ErrorMessage = "Формат: +380XXXXXXXXX")]
         public string? Phone { get; set; }
 
         [Display(Name = "Пароль")]

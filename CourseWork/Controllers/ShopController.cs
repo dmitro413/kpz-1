@@ -3,7 +3,7 @@ using CourseWork.Models;
 using CourseWork.Repositories; 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-
+using System.Security.Claims;
 namespace CourseWork.Controllers
 {
     public class ShopController : Controller
@@ -57,17 +57,25 @@ namespace CourseWork.Controllers
 
             return View(product);
         }
-        [Authorize(Roles = "Customer")]
+
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> AddReview(int productId, int rating, string comment)
         {
             if (rating != 1 && rating != -1)
             {
-                return BadRequest("Некоректна оцінка");
+                TempData["Error"] = "Некоректна оцінка.";
+                return RedirectToAction("Details", new { id = productId });
             }
 
-            int userId = 1;
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+            {
+                 // Тимчасово для тесту, якщо Identity ще не налаштовано повністю:
+                 userId = 1; 
+            }
 
             var review = new Review
             {
@@ -81,15 +89,16 @@ namespace CourseWork.Controllers
             try
             {
                 await _unitOfWork.Reviews.AddAsync(review);
-                await _unitOfWork.SaveAsync();        
+                await _unitOfWork.SaveAsync();
+                TempData["Success"] = "Дякуємо за ваш відгук!";
             }
-            catch
+            catch (Exception)
             {
+                // Швидше за все спрацював UNIQUE constraint (один відгук на один товар)
                 TempData["Error"] = "Ви вже залишали відгук на цей товар.";
-                return RedirectToAction("Details", new { id = productId });
             }
 
-            TempData["Success"] = "Дякуємо за відгук!";
+            // Повертаємо користувача назад на сторінку товару, щоб він побачив свій відгук
             return RedirectToAction("Details", new { id = productId });
         }
     }

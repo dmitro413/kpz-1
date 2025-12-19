@@ -17,7 +17,7 @@ namespace CourseWork.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IActionResult> Index(string searchString,  int? brandId, int? typeId, int page = 1,
+        public async Task<IActionResult> Index(bool showDeleted, string searchString,  int? brandId, int? typeId, int page = 1,
             int? reportTopCount = null, int? reportLowStock = null, int? reportDaysExpiry = null)
         {
             int pageSize = 10;
@@ -25,19 +25,21 @@ namespace CourseWork.Controllers
             int actualLowStock = reportLowStock ?? 10;
             int actualDaysExpiry = reportDaysExpiry ?? 30;
 
-            var productData = await _unitOfWork.Products.GetFilteredAsync(page, pageSize, searchString, brandId, typeId);
+            var productData = await _unitOfWork.Products.GetFilteredAsync(
+                  page, pageSize, searchString, brandId, typeId, showDeleted);
 
             var allBrands = await _unitOfWork.Brands.GetAllAsync();
             var allTypes = await _unitOfWork.TypeOfProducts.GetAllAsync();
             var topBrands = await _unitOfWork.Brands.GetTopBrandsByRevenueAsync(actualTopCount);
             var lowStock = await _unitOfWork.Products.GetLowStockProductsAsync(actualLowStock);
-            var expiringBatches = await _unitOfWork.ProductBatches.GetExpiringBatchesSPAsync(actualDaysExpiry);
+            var expiringBatches = await _unitOfWork.ProductBatches.GetExpiringBatchesAsync(actualDaysExpiry);
 
 
             var model = new DashboardViewModel
             {
                 Products = productData.Items,
                 TotalProducts = productData.TotalCount,
+                ShowDeleted = showDeleted,
 
                 Brands = await _unitOfWork.Brands.GetPagedAsync(page, pageSize),
                 Variants = await _unitOfWork.ProductVariants.GetPagedAsync(page, pageSize),
@@ -53,6 +55,8 @@ namespace CourseWork.Controllers
                 TotalUsers = await _unitOfWork.Users.CountAsync(),
                 Reviews = await _unitOfWork.Reviews.GetPagedAsync(page, pageSize),
                 TotalReviews = await _unitOfWork.Reviews.CountAsync(),
+                Orders = await _unitOfWork.Orders.GetAllOrdersWithDetailsAsync(),
+                OrderStatuses = await _unitOfWork.OrderStatuses.GetAllAsync(),
 
 
                 CurrentPage = page,
@@ -60,9 +64,10 @@ namespace CourseWork.Controllers
                 CurrentSearch = searchString,
                 CurrentBrandId = brandId,
                 CurrentTypeId = typeId,
+                ExpiringBatches = expiringBatches,
+
 
                 TopBrands = topBrands,
-                ExpiringBatches = expiringBatches,
 
                 LowStockProducts = lowStock,
                 ReportTopCount = actualTopCount,

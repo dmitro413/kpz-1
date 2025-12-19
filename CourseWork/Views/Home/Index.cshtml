@@ -70,6 +70,11 @@
             <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#tabReports" type="button" role="tab">
                 <i class="bi bi-graph-up-arrow"></i> Звіти
             </button>
+        <li class="nav-item">
+            <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#tabOrders">
+                <i class="bi bi-truck"></i> Замовлення <span class="badge bg-danger">@Model.Orders.Count(o => o.StatusId == 1)</span>
+            </button>
+        </li>
         </li>
     </ul>
 
@@ -247,7 +252,6 @@
             </div>
         </div>
 
-        <!--ТОВАРИ-->
         <div class="tab-pane fade" id="tabProducts" role="tabpanel" aria-labelledby="product-tab">
 
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -257,7 +261,7 @@
                 </a>
             </div>
 
-            <!-- ФОРМА ПОШУКУ -->
+            <!-- ФОРМА ПОШУКУ ТА ФІЛЬТРАЦІЇ -->
             <form method="get" asp-controller="Home" asp-action="Index" class="row g-2 mb-4 bg-light p-3 rounded border shadow-sm">
                 <input type="hidden" name="page" value="1" />
 
@@ -279,6 +283,16 @@
                         <i class="bi bi-search"></i> Шукати
                     </button>
                 </div>
+
+                <!-- Чекбокс для показу видалених товарів -->
+                <div class="col-12 mt-2 border-top pt-2">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="showDeletedCheck" name="showDeleted" value="true" @(Model.ShowDeleted ? "checked" : "") onchange="this.form.submit()">
+                        <label class="form-check-label fw-bold text-muted" for="showDeletedCheck">
+                            <i class="bi bi-trash"></i> Показувати архівні (видалені) товари
+                        </label>
+                    </div>
+                </div>
             </form>
 
             @if (Model.Products.Any())
@@ -294,13 +308,13 @@
                                 <th style="width: 130px;">Тип</th>
                                 <th style="width: 110px;">Калорії</th>
                                 <th style="width: 25%;">Опис</th>
-                                <th style="width: 140px;">Дії</th>
+                                <th style="width: 160px;">Дії</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var p in Model.Products)
                             {
-                                <tr>
+                                <tr class="@(p.IsDeleted ? "table-danger" : "")">
                                     <td class="text-center">
                                         @if (!string.IsNullOrEmpty(p.ImageUrl))
                                         {
@@ -356,22 +370,52 @@
                                             <span class="text-muted">—</span>
                                         }
                                     </td>
+
                                     <td class="text-center">
                                         <div class="btn-group" role="group">
-                                            <a asp-controller="Products" asp-action="Edit" asp-route-id="@p.ProductId" class="btn btn-warning btn-sm" title="Редагувати">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            @if (User.IsInRole("Admin"))
+
+                                            @if (p.IsDeleted)
                                             {
-                                                <button type="button"
-                                                class="btn btn-danger btn-sm"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#deleteProductModal"
-                                                    data-product-id="@p.ProductId"
-                                                    data-product-name="@p.Name"
-                                                    title="Видалити">
-                                                <i class="bi bi-trash"></i>
-                                            </button>}
+                                                if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                                                {
+                                                    <form asp-controller="Products" asp-action="Restore" asp-route-id="@p.ProductId" method="post" style="display:inline;">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="showDeleted" value="@Model.ShowDeleted.ToString().ToLower()" />
+
+                                                        <button type="submit" class="btn btn-success btn-sm" title="Відновити товар">
+                                                            <i class="bi bi-arrow-counterclockwise"></i> Відновити
+                                                        </button>
+                                                    </form>
+                                                }
+
+                                                if (User.IsInRole("Admin"))
+                                                {
+                                                    <form asp-controller="Products" asp-action="HardDelete" asp-route-id="@p.ProductId" method="post" style="display:inline;" onsubmit="return confirm('Видалити остаточно з бази? Це незворотно!');">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-dark btn-sm ms-1" title="Видалити повністю">
+                                                            <i class="bi bi-x-lg"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <a asp-controller="Products" asp-action="Edit" asp-route-id="@p.ProductId" class="btn btn-warning btn-sm" title="Редагувати">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                @if (User.IsInRole("Admin"))
+                                                {
+                                                    <button type="button"
+                                                            class="btn btn-danger btn-sm"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#deleteProductModal"
+                                                            data-product-id="@p.ProductId"
+                                                            data-product-name="@p.Name"
+                                                            title="Видалити в архів">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                }
+                                            }
                                         </div>
                                     </td>
                                 </tr>
@@ -384,12 +428,17 @@
                 {
                     <nav aria-label="Page navigation" class="mt-4">
                         <ul class="pagination justify-content-center">
+                            <!-- Кнопка "Попередня" -->
                             <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
                                 <a class="page-link" asp-controller="Home" asp-action="Index"
                                    asp-route-page="@(Model.CurrentPage - 1)"
                                    asp-route-searchString="@Model.CurrentSearch"
                                    asp-route-brandId="@Model.CurrentBrandId"
-                                   asp-route-typeId="@Model.CurrentTypeId">Попередня</a>
+                                   asp-route-typeId="@Model.CurrentTypeId"
+                                   asp-route-showDeleted="@Model.ShowDeleted">
+                                    <!-- ВАЖЛИВО -->
+                                    Попередня
+                                </a>
                             </li>
 
                             @for (int i = 1; i <= Model.TotalPages; i++)
@@ -399,7 +448,11 @@
                                        asp-route-page="@i"
                                        asp-route-searchString="@Model.CurrentSearch"
                                        asp-route-brandId="@Model.CurrentBrandId"
-                                       asp-route-typeId="@Model.CurrentTypeId">@i</a>
+                                       asp-route-typeId="@Model.CurrentTypeId"
+                                       asp-route-showDeleted="@Model.ShowDeleted">
+                                        <!-- ВАЖЛИВО -->
+                                        @i
+                                    </a>
                                 </li>
                             }
 
@@ -408,7 +461,11 @@
                                    asp-route-page="@(Model.CurrentPage + 1)"
                                    asp-route-searchString="@Model.CurrentSearch"
                                    asp-route-brandId="@Model.CurrentBrandId"
-                                   asp-route-typeId="@Model.CurrentTypeId">Наступна</a>
+                                   asp-route-typeId="@Model.CurrentTypeId"
+                                   asp-route-showDeleted="@Model.ShowDeleted">
+                                    <!-- ВАЖЛИВО -->
+                                    Наступна
+                                </a>
                             </li>
                         </ul>
                     </nav>
@@ -548,10 +605,16 @@
                                         }
                                     </td>
                                     <td class="text-center">
-                                        <form asp-controller="Batches" asp-action="Delete" asp-route-id="@b.BatchId" method="post" onsubmit="return confirm('Видалити цю партію?');">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
-                                        </form>
+                                        <button type="button" class="btn btn-danger btn-sm"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteBatchModal"
+                                                data-batch-id="@b.BatchId"
+                                                data-product-name="@(b.Variant?.Product?.Name)"
+                                                data-variant-info="@(b.Variant?.Weight?.WeightValue) @(b.Variant?.Weight?.Unit)"
+                                                data-stock="@b.Stock"
+                                                title="Видалити партію">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             }
@@ -697,12 +760,14 @@
                                     </td>
                                     <td class="text-center small">@r.CreatedAt?.ToShortDateString()</td>
                                     <td class="text-center">
-                                        <button type="button" class="btn btn-outline-danger btn-sm"
+
+                                            <button type="button" class="btn btn-danger btn-sm"
                                                 data-bs-toggle="modal" data-bs-target="#deleteReviewModal"
                                                 data-review-id="@r.ReviewId"
                                                 title="Видалити відгук">
-                                            <i class="bi bi-x-lg"></i>
-                                        </button>
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                          
                                     </td>
                                 </tr>
                             }
@@ -727,6 +792,75 @@
                     </p>
                 </div>
             }
+        </div>
+        <!-- Замовлення-->
+        <div class="tab-pane fade" id="tabOrders" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Замовлення</h3>
+            </div>
+
+            <div class="table-responsive shadow-sm rounded">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Дата</th>
+                            <th>Клієнт</th>
+                            <th>Сума</th>
+                            <th>Статус</th>
+                            <th>Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var o in Model.Orders)
+                        {
+                            <tr>
+                                <td>#@o.OrderId</td>
+                                <td>@o.OrderDate?.ToString("g")</td>
+                                <td>
+                                    <strong>@o.CustomerName</strong><br />
+                                    <small class="text-muted">@o.CustomerPhone</small>
+                                </td>
+                                <td class="fw-bold text-success">
+                                    @o.OrderDetails.Sum(x => x.Quantity * x.UnitPrice).ToString("N0") ₴
+                                </td>
+                                <td>
+                                    <form asp-controller="Orders" asp-action="UpdateStatus" method="post" class="d-flex">
+                                        <input type="hidden" name="orderId" value="@o.OrderId" />
+                                        <select name="statusId" class="form-select form-select-sm"
+                                                onchange="this.form.submit()"
+                                                style="width: 130px; border-color: @(o.StatusId == 4 ? "green" : "orange")">
+                                            @foreach (var s in Model.OrderStatuses)
+                                            {
+                                                <option value="@s.StatusId" selected="@(s.StatusId == o.StatusId)">
+                                                    @s.StatusName
+                                                </option>
+                                            }
+                                        </select>
+                                    </form>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-info text-white" type="button" data-bs-toggle="collapse" data-bs-target="#details-@o.OrderId">
+                                        Деталі
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="collapse bg-light" id="details-@o.OrderId">
+                                <td colspan="6" class="p-3">
+                                    <strong>Адреса:</strong> @o.DeliveryAddress <br />
+                                    <strong>Товари:</strong>
+                                    <ul>
+                                        @foreach (var d in o.OrderDetails)
+                                        {
+                                            <li>@d.Variant?.Product?.Name (@d.Quantity шт. x @d.UnitPrice ₴)</li>
+                                        }
+                                    </ul>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
         
       
@@ -794,7 +928,7 @@
                         <i class="bi bi-calendar-x"></i> Терміни придатності
                         @if (Model.ExpiringBatches.Any())
                         {
-                            <span class="badge bg-danger ms-1">@Model.ExpiringBatches.Count</span>
+                            <span class="badge bg-danger ms-1">@Model.ExpiringBatches.Count()</span>
                         }
                     </button>
                 </li>
@@ -904,20 +1038,22 @@
 
                                             <tr class="@(isExpired ? "table-danger" : "")">
                                                 <td>
-                                                    <strong>@b.ProductName</strong>
-                                                    <small class="d-block text-muted">@b.BrandName</small>
+                                                    <strong>@(b.Variant?.Product?.Name ?? "Видалений товар")</strong>
+                                                    <small class="d-block text-muted">@(b.Variant?.Product?.Brand?.BrandName)</small>
                                                 </td>
-                                                <td>#@b.BatchID</td>
-                                                <td>@b.WeightValue @b.Unit</td>
+                                                <td>#@b.BatchId</td> 
+                                                <td>
+                                                    @(b.Variant?.Weight?.WeightValue) @(b.Variant?.Weight?.Unit)
+                                                </td>
                                                 <td class="text-center">@b.ManufactureDate</td>
                                                 <td class="text-center fw-bold">
                                                     @b.ExpiryDate
-                                                    @if (isExpired)
+                                                    @if (b.ExpiryDate < DateOnly.FromDateTime(DateTime.Now))
                                                     {
                                                         <span class="badge bg-danger">ПРОСТРОЧЕНО</span>
                                                     }
                                                 </td>
-                                                <td class="text-center">@b.RemainingStock шт.</td>
+                                                <td class="text-center">@b.Stock шт.</td> 
                                             </tr>
                                         }
                                     }
@@ -998,17 +1134,48 @@
                 <h4 class="text-center text-danger" id="deleteProductName"></h4>
                 <p class="text-muted small text-center mt-2">Картинка також буде видалена (або товар буде переміщено в архів).</p>
             </div>
+                    <<div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                        <form id="deleteProductForm" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden" name="showDeleted" value="@Model.ShowDeleted.ToString().ToLower()" />
+                            <button type="submit" class="btn btn-danger">Видалити</button>
+                        </form>
+                    </div>
+        </div>
+    </div>
+</div>
+<!--Видалення Партії -->
+<div class="modal fade" id="deleteBatchModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Списання партії</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p>Ви впевнені, що хочете видалити цю партію товару?</p>
+                
+                <h4 class="text-danger fw-bold" id="deleteBatchProduct"></h4>
+                <p class="text-muted mb-1" id="deleteBatchVariant"></p>
+                
+                <div class="alert alert-warning mt-3 d-inline-block">
+                    Буде списано зі складу: <strong id="deleteBatchStock" class="fs-5"></strong> шт.
+                </div>
+                
+                <p class="small text-muted mt-2">Ця дія незворотна.</p>
+            </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                <form id="deleteProductForm" method="post">
+                <form id="deleteBatchForm" method="post">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-danger">Видалити</button>
+                    <button type="submit" class="btn btn-danger">Списати партію</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-
 <!--Видалення Варіанту-->
 <div class="modal fade" id="deleteVariantModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -1184,11 +1351,27 @@
         }
     const deleteReviewModal = document.getElementById('deleteReviewModal');
         if (deleteReviewModal) {
-                deleteReviewModal.addEventListener('show.bs.modal', function (event) {
+               deleteReviewModal.addEventListener('show.bs.modal', function (event) {
                const button = event.relatedTarget;
                const id = button.getAttribute('data-review-id');
                document.getElementById('deleteReviewForm').action = '/Reviews/Delete/' + id;
-                });
+               });
+        }
+        const deleteBatchModal = document.getElementById('deleteBatchModal');
+        if (deleteBatchModal) {
+              deleteBatchModal.addEventListener('show.bs.modal', function (event) {
+              const button = event.relatedTarget;
+              
+              const id = button.getAttribute('data-batch-id');
+              const productName = button.getAttribute('data-product-name');
+              const variantInfo = button.getAttribute('data-variant-info');
+              const stock = button.getAttribute('data-stock');
+              document.getElementById('deleteBatchProduct').textContent = productName;
+              document.getElementById('deleteBatchVariant').textContent = variantInfo;
+              document.getElementById('deleteBatchStock').textContent = stock;
+              
+              document.getElementById('deleteBatchForm').action = '/Batches/Delete/' + id;
+              });
         }
     </script>
 }

@@ -11,6 +11,7 @@ namespace CourseWork.Repositories
         public async Task<List<Order>> GetByUserIdAsync(int userId)
         {
             return await _dbSet
+                 .IgnoreQueryFilters()
                 .Include(o => o.Status) 
                 .Include(o => o.OrderDetails) 
                     .ThenInclude(od => od.Variant)
@@ -19,6 +20,17 @@ namespace CourseWork.Repositories
                     .ThenInclude(od => od.Variant)
                         .ThenInclude(v => v.Weight) 
                 .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.CreatedAt) 
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<Order>> GetAllOrdersWithDetailsAsync()
+        {
+            return await _dbSet
+                .Include(o => o.Status)
+                .Include(o => o.User) 
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Variant)
+                        .ThenInclude(v => v.Product)
                 .OrderByDescending(o => o.CreatedAt) 
                 .ToListAsync();
         }

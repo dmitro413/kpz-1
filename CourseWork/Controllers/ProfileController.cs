@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
 using CourseWork.Data;
 using CourseWork.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -84,6 +86,61 @@ namespace CourseWork.Controllers
 
             var orders = await _unitOfWork.Orders.GetByUserIdAsync(userId);
             return View(orders);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var user = await GetCurrentUserAsync();
+            if (user == null) return RedirectToAction("Login", "Account");
+
+            if (user.Role == "Admin" || user.Role == "Manager")
+            {
+                TempData["Error"] = "Адміністратори та менеджери не можуть видаляти свій акаунт.";
+                return RedirectToAction("Index");
+            }
+
+            var userOrders = await _unitOfWork.Orders.GetByUserIdAsync(user.UserId);
+
+            bool hasActiveOrders = userOrders.Any(o => o.StatusId != 3 && o.StatusId != 4);
+
+            if (hasActiveOrders)
+            {
+                TempData["Error"] = "Неможливо видалити акаунт: у вас є активні замовлення. Дочекайтеся їх виконання.";
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                foreach (var order in userOrders)
+                {
+                    order.UserId = null;
+                    _unitOfWork.Orders.Update(order);
+                }
+
+                var userReviews = await _unitOfWork.Reviews.GetByUserIdAsync(user.UserId);
+
+                foreach (var review in userReviews)
+                {
+                    _unitOfWork.Reviews.Remove(review);
+                }
+
+                _unitOfWork.Users.Remove(user);
+
+                await _unitOfWork.SaveAsync();
+
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                HttpContext.Session.Clear();
+
+                TempData["Success"] = "Ваш акаунт та особисті дані успішно видалено.";
+                return RedirectToAction("Index", "Shop");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Сталася помилка при видаленні даних. Спробуйте пізніше.";
+                return RedirectToAction("Index");
+            }
         }
 
         private async Task<User?> GetCurrentUserAsync()
