@@ -22,20 +22,43 @@ namespace CourseWork.Controllers
             var cart = HttpContext.Session.GetObject<List<CartItem>>(CartKey);
             if (cart == null || !cart.Any()) return RedirectToAction("Index", "Cart");
 
-            foreach (var item in cart)
+            if (cart.Any(x => x.Quantity <= 0 || x.Price < 0))
             {
-                var variant = await _unitOfWork.ProductVariants.GetByIdAsync(item.VariantId);
+                HttpContext.Session.Remove(CartKey);
+                TempData["Error"] = "Некоректні дані в кошику. Кошик очищено.";
+                return RedirectToAction("Index", "Shop");
+            }
+
+            bool hasErrors = false;
+            for (int i = 0; i < cart.Count; i++)
+            {
+                var item = cart[i];
                 int availableStock = await _unitOfWork.ProductVariants.GetTotalStockAsync(item.VariantId);
 
                 if (item.Quantity > availableStock)
                 {
-                    TempData["Error"] = $"Товару '{item.ProductName}' недостатньо на складі. Доступно: {availableStock} шт.";
-                    return RedirectToAction("Index", "Cart");
+                    hasErrors = true;
+                    if (availableStock > 0)
+                    {
+                        TempData["Error"] = $"Товару '{item.ProductName}' недостатньо. Кількість змінено на {availableStock} шт.";
+                        item.Quantity = availableStock;
+                    }
+                    else
+                    {
+                        TempData["Error"] = $"Товар '{item.ProductName}' закінчився.";
+                        item.Quantity = 0;
+                    }
                 }
             }
 
-            var model = new Order();
+            if (hasErrors)
+            {
+                cart.RemoveAll(x => x.Quantity == 0);
+                HttpContext.Session.SetObject(CartKey, cart);
+                return RedirectToAction("Index", "Cart");
+            }
 
+            var model = new Order();
             if (User.Identity.IsAuthenticated)
             {
                 var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -50,7 +73,8 @@ namespace CourseWork.Controllers
                     }
                 }
             }
-
+            ViewBag.CartTotalCount = cart.Sum(x => x.Quantity);
+            ViewBag.CartTotalPrice = cart.Sum(x => x.TotalPrice);
             return View(model);
         }
 
@@ -61,15 +85,32 @@ namespace CourseWork.Controllers
             var cart = HttpContext.Session.GetObject<List<CartItem>>(CartKey);
             if (cart == null || !cart.Any()) return RedirectToAction("Index", "Cart");
 
+            for (int i = cart.Count - 1; i >= 0; i--)
+            {
+                var item = cart[i];
+                if (item.Quantity <= 0)
+                {
+                    cart.RemoveAt(i);
+                    HttpContext.Session.SetObject(CartKey, cart);
+                    TempData["Error"] = "Некоректна кількість товару.";
+                    return RedirectToAction("Index", "Cart");
+                }
+
+                int availableStock = await _unitOfWork.ProductVariants.GetTotalStockAsync(item.VariantId);
+                if (item.Quantity > availableStock)
+                {
+                    TempData["Error"] = $"Товару '{item.ProductName}' недостатньо для завершення замовлення.";
+                    return RedirectToAction("Index", "Cart");
+                }
+            }
+
             int? userId = null;
             if (User.Identity.IsAuthenticated)
             {
                 var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (int.TryParse(userIdStr, out int parsedId))
-                {
-                    userId = parsedId;
-                }
+                if (int.TryParse(userIdStr, out int parsedId)) userId = parsedId;
             }
+
             var order = new Order
             {
                 UserId = userId,
@@ -90,6 +131,8 @@ namespace CourseWork.Controllers
 
                 foreach (var item in cart)
                 {
+                    await _unitOfWork.ProductBatches.DecreaseStockAsync(item.VariantId, item.Quantity);
+
                     var detail = new OrderDetail
                     {
                         Order = order,
@@ -98,26 +141,16 @@ namespace CourseWork.Controllers
                         UnitPrice = item.Price
                     };
                     await _unitOfWork.OrderDetails.AddAsync(detail);
-
-                    await _unitOfWork.ProductBatches.DecreaseStockAsync(item.VariantId, item.Quantity);
                 }
 
                 await _unitOfWork.SaveAsync();
-
                 HttpContext.Session.Remove(CartKey);
-
                 return View("Success");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                if (ex.InnerException != null && ex.InnerException.Message.Contains("не може бути від'ємною"))
-                {
-                    TempData["Error"] = "На жаль, товару на складі вже не вистачає. Хтось встиг купити його раніше. Будь ласка, перевірте кошик.";
-                    return RedirectToAction("Index", "Cart");
-                }
-
-                ModelState.AddModelError("", "Помилка сервера: " + ex.Message);
-                return View("Index", orderModel);
+                TempData["Error"] = "Помилка при створенні замовлення. Можливо, товар закінчився.";
+                return RedirectToAction("Index", "Cart");
             }
         }
     }

@@ -29,7 +29,7 @@ namespace CourseWork.Models
         public int TotalWeights { get; set; }
         public int TotalUsers { get; set; }
         public int TotalReviews { get; set; }
-
+        public int TotalOrders { get; set; }
 
         public bool ShowDeleted { get; set; }
 
@@ -41,6 +41,22 @@ namespace CourseWork.Models
         public string? CurrentSearch { get; set; }
         public int? CurrentBrandId { get; set; }
         public int? CurrentTypeId { get; set; }
+
+
+        public string? OrderSearch { get; set; }
+        public int OrderCurrentPage { get; set; } = 1;
+        public int OrderTotalPages { get; set; }
+
+        public string? UserSearch { get; set; }
+
+
+        public string? VariantSearch { get; set; }
+        public int VariantCurrentPage { get; set; } = 1;
+        public int VariantTotalPages { get; set; }
+
+
+        public int? CurrentOrderStatusId { get; set; }
+
 
         public int ReportDaysUntilExpiry { get; set; } = 30;
 

@@ -3,7 +3,8 @@ using CourseWork.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization; 
+using Microsoft.AspNetCore.Authorization;
+using CourseWork.Repositories; 
 
 namespace CourseWork.Controllers
 {
@@ -73,11 +74,6 @@ namespace CourseWork.Controllers
 
             if (!ModelState.IsValid)
             {
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    Console.WriteLine($"Помилка валідації: {error.ErrorMessage}");
-                }
-
                 await PopulateDropdowns(product.BrandId, product.TypeOfProductId);
                 return View("~/Views/Home/FormProduct.cshtml", product);
             }
@@ -156,23 +152,38 @@ namespace CourseWork.Controllers
 
             return RedirectToAction("Index", "Home", new { showDeleted = showDeleted });
         }
-        [Authorize(Roles = "Admin")] 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> HardDelete(int id)
         {
-            var product = await _unitOfWork.Products
-                .GetAllIncludingDeletedAsync()
-                .ContinueWith(t => t.Result.FirstOrDefault(p => p.ProductId == id));
+            var product = await ((ProductRepository)_unitOfWork.Products).GetByIdIncludingDeletedAsync(id);
 
             if (product != null)
             {
                 try
                 {
                     DeleteImageFile(product.ImageUrl);
-                    _unitOfWork.Products.HardDelete(product);
+
+                    var reviews = await _unitOfWork.Reviews.GetByProductIdAsync(id); 
+                    foreach (var review in reviews)
+                    {
+                        _unitOfWork.Reviews.Remove(review);
+                    }
+
+                    var variants = await _unitOfWork.ProductVariants.GetByProductIdAsync(id);
+                    foreach (var variant in variants)
+                    {
+                        var batches = await _unitOfWork.ProductBatches.GetByVariantIdAsync(variant.VariantId); 
+                        foreach (var batch in batches)
+                        {
+                            _unitOfWork.ProductBatches.Remove(batch);
+                        }
+                        _unitOfWork.ProductVariants.Remove(variant);
+                    }
+
+                    ((ProductRepository)_unitOfWork.Products).HardDelete(product);
                     await _unitOfWork.SaveAsync();
-                    
                     TempData["Success"] = "Продукт остаточно видалено з бази даних.";
                 }
                 catch (DbUpdateException)
@@ -184,8 +195,8 @@ namespace CourseWork.Controllers
             {
                 TempData["Error"] = "Продукт не знайдено.";
             }
-            
-            return RedirectToAction("Index", "Home");
+
+            return RedirectToAction("Index", "Home", new { showDeleted = true });
         }
 
         private async Task<string> SaveImageAsync(IFormFile imageFile)
@@ -248,6 +259,7 @@ namespace CourseWork.Controllers
             }
         }
 
+
         private async Task PopulateDropdowns(int? brandId = null, int? typeId = null)
         {
             ViewBag.BrandId = new SelectList(
@@ -264,5 +276,7 @@ namespace CourseWork.Controllers
                 typeId
             );
         }
+
+
     }
 }

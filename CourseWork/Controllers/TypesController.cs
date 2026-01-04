@@ -53,14 +53,22 @@ namespace CourseWork.Controllers
         {
             if (ModelState.IsValid)
             {
-                var existing = await _unitOfWork.TypeOfProducts.GetByIdAsync(type.TypeOfProductId);
-                if (existing != null)
+                try
                 {
-                    existing.TypeOfProductName = type.TypeOfProductName;
-                    _unitOfWork.TypeOfProducts.Update(existing);
-                    await _unitOfWork.SaveAsync();
-                    TempData["Success"] = "Тип продукту оновлено.";
-                    return RedirectToAction("Index", "Home");
+                    var existing = await _unitOfWork.TypeOfProducts.GetByIdAsync(type.TypeOfProductId);
+                    if (existing != null)
+                    {
+                        existing.TypeOfProductName = type.TypeOfProductName;
+                        _unitOfWork.TypeOfProducts.Update(existing);
+                        await _unitOfWork.SaveAsync();
+
+                        TempData["Success"] = "Тип продукту оновлено.";
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
+                catch (DbUpdateException)
+                {
+                    ModelState.AddModelError("TypeOfProductName", "Такий тип продукту вже існує.");
                 }
             }
             return View("~/Views/Home/FormType.cshtml", type);

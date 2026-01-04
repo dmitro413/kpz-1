@@ -13,12 +13,13 @@ namespace CourseWork.Repositories
             return await _dbSet
                 .Include(b => b.Variant).ThenInclude(v => v.Product)
                 .Include(b => b.Variant).ThenInclude(v => v.Weight)
-                .OrderByDescending(b => b.CreatedAt)
+                .Where(b => !b.Variant.Product.IsDeleted) 
+                .OrderByDescending(b => b.CreatedAt) 
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
         }
- 
+
         public async Task<IEnumerable<ProductBatch>> GetExpiringBatchesAsync(int days)
         {
             var thresholdDate = DateOnly.FromDateTime(DateTime.Now.AddDays(days));
@@ -33,6 +34,9 @@ namespace CourseWork.Repositories
 
         public async Task DecreaseStockAsync(int variantId, int quantityNeeded)
         {
+            if (quantityNeeded <= 0)
+                throw new ArgumentException("Кількість для списання має бути додатною.");
+
             var batches = await _context.ProductBatches
                 .Where(b => b.VariantId == variantId && b.Stock > 0)
                 .OrderBy(b => b.ManufactureDate)
@@ -62,6 +66,11 @@ namespace CourseWork.Repositories
             {
                 throw new Exception($"Недостатньо товару на складі! Не вистачає {remaining} шт.");
             }
+
+        }
+        public async Task<List<ProductBatch>> GetByVariantIdAsync(int variantId)
+        {
+            return await _dbSet.IgnoreQueryFilters().Where(b => b.VariantId == variantId).ToListAsync();
         }
     }
 }

@@ -9,7 +9,8 @@ public partial class User
     public int UserId { get; set; }
 
     public string FullName { get; set; } = null!;
-
+    [Required(ErrorMessage = "Введіть Email")]
+    [EmailAddress(ErrorMessage = "Некоректний Email")]
     public string Email { get; set; } = null!;
     [RegularExpression(@"^\+380\d{9}$", ErrorMessage = "Формат: +380xxxxxxxxx")]
     public string? Phone { get; set; }

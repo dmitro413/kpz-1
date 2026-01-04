@@ -35,14 +35,18 @@
                     </div>
                 }
 
-                @if (!string.IsNullOrEmpty(Model.ImageUrl))
-                {
-                    <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid rounded" style="max-height: 500px; object-fit: contain;">
-                }
-                else
-                {
-                    <div class="py-5 bg-light text-muted rounded"><i class="bi bi-image" style="font-size: 4rem;"></i><p>Немає фото</p></div>
-                }
+                <a asp-controller="Shop"
+                   asp-action="Details"
+                   asp-route-id="@Model.ProductId"
+                   class="text-center mb-2 d-block">
+
+                    <img src="@(string.IsNullOrWhiteSpace(Model.ImageUrl) ? "/images/no-image.png" : Model.ImageUrl)"
+                         alt="@Model.Name"
+                         class="img-fluid rounded"
+                         style="max-height: 500px; width: 100%; object-fit: contain;"
+                         loading="lazy"
+                         onerror="this.onerror=null; this.src='/images/no-image.png';">
+                </a>
             </div>
         </div>
 
@@ -52,7 +56,6 @@
             <span class="badge bg-info text-dark mb-3">@Model.TypeOfProduct.TypeOfProductName</span>
 
             <div class="p-3 bg-light rounded mb-4 shadow-sm" id="variant-info-block">
-
                 <div id="stock-status-container" class="mb-2">
                     @if (defaultStock > 0)
                     {
@@ -78,19 +81,14 @@
                 <div class="d-flex flex-wrap gap-2">
                     @foreach (var v in variants)
                     {
-                        int stock = v.ProductBatches
-                        .Where(b => b.ExpiryDate > today)
-                        .Sum(b => b.Stock);
-
+                        int stock = v.ProductBatches.Where(b => b.ExpiryDate > today).Sum(b => b.Stock);
                         bool inStock = stock > 0;
                         string btnClass = v == defaultVariant ? "btn-success active" : "btn-outline-secondary";
 
                         <button type="button"
                                 class="btn @btnClass variant-btn position-relative @(!inStock ? "opacity-75" : "")"
                                 onclick="updateVariantInfo('@v.Price.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)', @stock, @v.VariantId, this)">
-
                             @v.Weight?.WeightValue @v.Weight?.Unit
-
                             @if (!inStock)
                             {
                                 <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width: 10px; height: 10px;"></span>
@@ -102,7 +100,6 @@
 
             <form asp-controller="Cart" asp-action="AddToCart" method="post">
                 <input type="hidden" name="variantId" id="selectedVariantId" value="@(defaultVariant?.VariantId)" />
-
                 <button type="submit" class="btn btn-primary btn-lg w-100 py-3 rounded shadow-sm"
                         id="addToCartBtn" @(defaultStock == 0 ? "disabled" : "")>
                     <i class="bi bi-cart3 me-2"></i>
@@ -116,96 +113,94 @@
         </div>
     </div>
 
-    <ul class="nav nav-tabs mb-4" id="productTabs" role="tablist">
-        <li class="nav-item">
-            <button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc">Опис</button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews">
-                Відгуки <span class="badge bg-secondary rounded-pill">@Model.Reviews.Count</span>
-            </button>
-        </li>
-    </ul>
+    <div class="mb-5">
+        <h3 class="fw-bold mb-3">Опис</h3>
+        <p class="lead">@Model.Description</p>
+    </div>
 
-    <div class="tab-content">
-        <div class="tab-pane fade show active" id="desc">
-            <p class="lead">@Model.Description</p>
-        </div>
-        <div class="tab-pane fade" id="reviews" role="tabpanel">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4>Відгуки покупців</h4>
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold">Відгуки покупців <span class="badge bg-secondary rounded-pill">@Model.Reviews.Count</span></h3>
 
-                @if (User.Identity.IsAuthenticated)
+            @if (User.Identity.IsAuthenticated)
+            {
+                if (!userHasReviewed)
                 {
-                    if (!userHasReviewed)
-                    {
-                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addReviewModal">
-                            <i class="bi bi-pencil-square"></i> Написати відгук
-                        </button>
-                    }
-                    else
-                    {
-                        <span class="text-success"><i class="bi bi-check-lg"></i> Ви вже залишили відгук</span>
-                    }
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addReviewModal">
+                        <i class="bi bi-pencil-square"></i> Написати відгук
+                    </button>
                 }
                 else
                 {
-                    <a href="/Account/Login" class="btn btn-outline-secondary">
-                        <i class="bi bi-box-arrow-in-right"></i> Увійдіть, щоб залишити відгук
-                    </a>
+                    <span class="text-success"><i class="bi bi-check-lg"></i> Ви вже залишили відгук</span>
                 }
-            </div>
-
-            @if (Model.Reviews.Any())
-            {
-                <div class="vstack gap-3">
-                    @foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedAt))
-                    {
-                        <div class="border rounded p-3 bg-light shadow-sm">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div class="d-flex align-items-center">
-                                    <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
-                                        <i class="bi bi-person-fill"></i>
-                                    </div>
-                                    <strong>@(review.User?.FullName ?? "Клієнт")</strong>
-                                </div>
-                                <span class="text-muted small">@review.CreatedAt?.ToShortDateString()</span>
-                            </div>
-
-                            <div class="mb-2">
-                                @if (review.Rating == 1)
-                                {
-                                    <span class="badge bg-success"><i class="bi bi-hand-thumbs-up-fill"></i> Рекомендую</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-danger"><i class="bi bi-hand-thumbs-down-fill"></i> Не рекомендую</span>
-                                }
-                            </div>
-
-                            <p class="mb-0 text-break">@review.Comment</p>
-                        </div>
-                    }
-                </div>
             }
             else
             {
-                <div class="text-center py-5 text-muted border rounded bg-light border-dashed">
-                    <i class="bi bi-chat-square-dots fs-1"></i>
-                    <p class="mt-2">Ще немає відгуків. Ваш може бути першим!</p>
-                </div>
+                <a href="/Account/Login" class="btn btn-outline-secondary">
+                    <i class="bi bi-box-arrow-in-right"></i> Увійдіть, щоб залишити відгук
+                </a>
             }
         </div>
+
+        @if (Model.Reviews.Any())
+        {
+            <div class="vstack gap-3">
+                @foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedAt))
+                {
+                    <div class="border rounded p-3 bg-light shadow-sm mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="d-flex align-items-center mb-1">
+                                    <strong>@(review.User?.FullName ?? "Клієнт")</strong>
+                                    <span class="text-muted small ms-2">@review.CreatedAt?.ToShortDateString()</span>
+                                </div>
+
+                                <div class="mb-2">
+                                    @if (review.Rating == 1)
+                                    {
+                                        <span class="badge bg-success"><i class="bi bi-hand-thumbs-up-fill"></i> Рекомендую</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger"><i class="bi bi-hand-thumbs-down-fill"></i> Не рекомендую</span>
+                                    }
+                                </div>
+                            </div>
+
+                            @if (User.Identity.IsAuthenticated && (review.UserId.ToString() == currentUserId || User.IsInRole("Admin")))
+                            {
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger border-0"
+                                        title="Видалити відгук"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteReviewModal"
+                                        data-review-id="@review.ReviewId">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            }
+                        </div>
+
+                        <p class="mb-0 text-break">@review.Comment</p>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 text-muted border rounded bg-light border-dashed">
+                <i class="bi bi-chat-square-dots fs-1"></i>
+                <p class="mt-2">Ще немає відгуків. Ваш може бути першим!</p>
+            </div>
+        }
     </div>
 </div>
-
-
 
 <div class="modal fade" id="addReviewModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <form asp-action="AddReview" method="post">
-                @Html.AntiForgeryToken() 
+                @Html.AntiForgeryToken()
                 <input type="hidden" name="productId" value="@Model.ProductId" />
                 <div class="modal-header bg-light">
                     <h5 class="modal-title">Ваш відгук про @Model.Name</h5>
@@ -242,13 +237,38 @@
     </div>
 </div>
 
+<div class="modal fade" id="deleteReviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill"></i> Видалення відгуку</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="bi bi-trash3 text-danger mb-3" style="font-size: 3rem;"></i>
+                <p class="lead">Ви впевнені, що хочете видалити цей відгук?</p>
+                <p class="text-muted small">Цю дію неможливо скасувати.</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Скасувати</button>
+
+                <form id="deleteReviewForm" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+
+                    <button type="submit" class="btn btn-danger">Видалити</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <script>
         function updateVariantInfo(priceRaw, stock, variantId, btn) {
             const price = parseFloat(priceRaw);
             const priceEl = document.getElementById('displayPrice');
-
             priceEl.innerText = price.toLocaleString('uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
             const statusContainer = document.getElementById('stock-status-container');
@@ -256,19 +276,17 @@
 
             if (stock > 0) {
                 statusContainer.innerHTML = `
-                            <span class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Є в наявності</span>
-                            <span class="text-muted ms-2 small">(Залишок: ${stock} шт.)</span>
-                        `;
-
+                                    <span class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Є в наявності</span>
+                                    <span class="text-muted ms-2 small">(Залишок: ${stock} шт.)</span>
+                                `;
                 buyBtn.removeAttribute('disabled');
                 buyBtn.innerHTML = '<i class="bi bi-cart3 me-2"></i> Додати в кошик';
                 buyBtn.classList.remove('btn-secondary');
                 buyBtn.classList.add('btn-primary');
             } else {
                 statusContainer.innerHTML = `
-                            <span class="text-danger fw-bold"><i class="bi bi-x-circle-fill"></i> Закінчився</span>
-                        `;
-
+                                    <span class="text-danger fw-bold"><i class="bi bi-x-circle-fill"></i> Закінчився</span>
+                                `;
                 buyBtn.setAttribute('disabled', 'disabled');
                 buyBtn.innerHTML = 'Немає в наявності';
                 buyBtn.classList.remove('btn-primary');
@@ -284,6 +302,17 @@
             btn.classList.add('btn-success', 'active');
 
             document.getElementById('selectedVariantId').value = variantId;
+        }
+
+        const deleteReviewModal = document.getElementById('deleteReviewModal');
+        if (deleteReviewModal) {
+            deleteReviewModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const reviewId = button.getAttribute('data-review-id');
+
+                const form = document.getElementById('deleteReviewForm');
+                form.action = '/Reviews/Delete/' + reviewId;
+            });
         }
     </script>
 }

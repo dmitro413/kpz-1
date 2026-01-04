@@ -11,8 +11,9 @@ namespace CourseWork.Repositories
         public async Task<IEnumerable<Review>> GetPagedAsync(int page, int pageSize)
         {
             return await _dbSet
-                .Include(r => r.User)    
-                .Include(r => r.Product) 
+                .Include(r => r.User)
+                .Include(r => r.Product)
+                .Where(r => !r.Product.IsDeleted) 
                 .OrderByDescending(r => r.CreatedAt) 
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -21,6 +22,10 @@ namespace CourseWork.Repositories
         public async Task<List<Review>> GetByUserIdAsync(int userId)
         {
             return await _dbSet.Where(r => r.UserId == userId).ToListAsync();
+        }
+        public async Task<List<Review>> GetByProductIdAsync(int productId)
+        {
+            return await _dbSet.IgnoreQueryFilters().Where(r => r.ProductId == productId).ToListAsync();
         }
     }
 }

@@ -30,5 +30,34 @@ namespace CourseWork.Controllers
             }
             return RedirectToAction("Index", "Home");
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var order = await _unitOfWork.Orders.GetByIdAsync(id);
+            if (order == null) return NotFound();
+
+            try
+            {
+                var details = await _unitOfWork.OrderDetails.GetByOrderIdAsync(id);
+
+                foreach (var d in details)
+                {
+                    _unitOfWork.OrderDetails.Remove(d);
+                }
+
+                _unitOfWork.Orders.Remove(order);
+
+                await _unitOfWork.SaveAsync();
+
+                TempData["Success"] = $"Замовлення #{id} та всі його дані видалено.";
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "Не вдалося видалити замовлення через технічну помилку.";
+            }
+
+            return RedirectToAction("Index", "Home");
+        }
     }
 }

@@ -50,6 +50,7 @@ namespace CourseWork.Controllers
                 catch (DbUpdateException)
                 {
                     ModelState.AddModelError("Email", "Цей Email вже існує.");
+                    user.PasswordHash = "";
                 }
             }
             return View("~/Views/Home/FormUser.cshtml", user);
@@ -162,7 +163,7 @@ namespace CourseWork.Controllers
                 }
                 catch
                 {
-                    TempData["Error"] = "Неможливо видалити: у користувача є замовлення.";
+                    TempData["Error"] = "Сталася помилка при видаленні користувача.";
                 }
             }
             return RedirectToAction("Index", "Home");

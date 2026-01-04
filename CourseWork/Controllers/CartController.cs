@@ -24,6 +24,11 @@ namespace CourseWork.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToCart(int variantId, int quantity = 1)
         {
+            if (quantity <= 0)
+            {
+                TempData["Error"] = "Кількість повинна бути мінімум 1.";
+                return RedirectToAction("Index", "Shop"); 
+            }
             var variant = await _unitOfWork.ProductVariants.GetByIdAsync(variantId);
             if (variant == null) return NotFound();
 
@@ -43,6 +48,7 @@ namespace CourseWork.Controllers
             int currentQtyInCart = existingItem?.Quantity ?? 0;
             int totalRequested = currentQtyInCart + quantity;
             int availableStock = await _unitOfWork.ProductVariants.GetTotalStockAsync(variantId);
+
             if (totalRequested > availableStock)
             {
                 TempData["Error"] = $"Неможливо додати. На складі залишилось всього {availableStock} шт.";
@@ -94,31 +100,34 @@ namespace CourseWork.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateQuantity(int variantId, int quantity)
         {
-            var cart = HttpContext.Session.GetObject<List<CartItem>>("Cart") ?? new List<CartItem>();
+            var cart = HttpContext.Session.GetObject<List<CartItem>>("Cart")
+                       ?? new List<CartItem>();
+
             var item = cart.FirstOrDefault(x => x.VariantId == variantId);
+            if (item == null)
+                return RedirectToAction("Index");
 
-            if (item != null)
+            if (quantity <= 0)
             {
-                if (quantity > 0)
-                {
-                    int availableStock = await _unitOfWork.ProductVariants.GetTotalStockAsync(variantId);
-
-                    if (quantity > availableStock)
-                    {
-                        TempData["Error"] = $"Максимальна доступна кількість: {availableStock} шт.";
-                        item.Quantity = availableStock; 
-                    }
-                    else
-                    {
-                        item.Quantity = quantity;
-                    }
-                }
-                else
-                {
-                    cart.Remove(item);
-                }
+                cart.Remove(item);
                 HttpContext.Session.SetObject("Cart", cart);
+                return RedirectToAction("Index");
             }
+
+            int availableStock = await _unitOfWork.ProductVariants.GetTotalStockAsync(variantId);
+
+            if (quantity > availableStock)
+            {
+                TempData["Error"] = $"Вибачте, доступно лише {availableStock} шт.";
+                item.Quantity = availableStock;
+            }
+            else
+            {
+                item.Quantity = quantity;
+            }
+
+            HttpContext.Session.SetObject("Cart", cart);
+
             return RedirectToAction("Index");
         }
     }

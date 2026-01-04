@@ -1,4 +1,6 @@
-﻿@{
+﻿@model CourseWork.Models.LoginViewModel
+
+@{
     ViewData["Title"] = "Вхід";
 }
 
@@ -19,13 +21,15 @@
                         @Html.AntiForgeryToken()
 
                         <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input name="email" type="email" class="form-control" required />
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Пароль</label>
-                            <input name="password" type="password" class="form-control" required />
+                            <label asp-for="Password" class="form-label"></label>
+                            <input asp-for="Password" class="form-control" placeholder="******" />
+                            <span asp-validation-for="Password" class="text-danger small"></span>
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100">Увійти</button>
@@ -38,3 +42,9 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

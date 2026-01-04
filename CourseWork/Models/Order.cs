@@ -1,4 +1,6 @@
-﻿namespace CourseWork.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace CourseWork.Models;
 
 public partial class Order
 {
@@ -9,12 +11,16 @@ public partial class Order
     public DateTime? OrderDate { get; set; }
 
     public int StatusId { get; set; }
+    [Required(ErrorMessage = "Введіть ім'я")]
 
     public string? CustomerName { get; set; }
-
+    [Required(ErrorMessage = "Введіть Email")]
+    [EmailAddress(ErrorMessage = "Некоректний Email")]
     public string? CustomerEmail { get; set; }
-
+    [Required(ErrorMessage = "Введіть телефон")]
+    [RegularExpression(@"^\+380\d{9}$", ErrorMessage = "Формат: +380xxxxxxxxx")]
     public string? CustomerPhone { get; set; }
+    [Required(ErrorMessage = "Введіть адресу доставки")]
 
     public string? DeliveryAddress { get; set; }
 

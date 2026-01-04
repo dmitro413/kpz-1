@@ -1,32 +1,45 @@
 ﻿using CourseWork.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
-namespace CourseWork.Controllers
+[Authorize] 
+public class ReviewsController : Controller
 {
-    [Authorize(Roles = "Admin")]
-    public class ReviewsController : Controller
+    private readonly UnitOfWork _unitOfWork;
+
+    public ReviewsController(UnitOfWork unitOfWork)
     {
-        private readonly UnitOfWork _unitOfWork;
+        _unitOfWork = unitOfWork;
+    }
 
-        public ReviewsController(UnitOfWork unitOfWork)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id, string? returnUrl = null)
+    {
+        var review = await _unitOfWork.Reviews.GetByIdAsync(id);
+        if (review == null) return NotFound();
+
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userIdStr, out int currentUserId)) return Forbid();
+
+        bool isAdmin = User.IsInRole("Admin");
+        if (review.UserId != currentUserId && !isAdmin)
         {
-            _unitOfWork = unitOfWork;
+            return Forbid(); 
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var review = await _unitOfWork.Reviews.GetByIdAsync(id);
-            if (review != null)
-            {
-                _unitOfWork.Reviews.Remove(review);
+        int productId = review.ProductId; 
+        _unitOfWork.Reviews.Remove(review);
+        await _unitOfWork.SaveAsync();
 
-                await _unitOfWork.SaveAsync();
-                TempData["Success"] = "Відгук видалено.";
-            }
-            return RedirectToAction("Index", "Home");
+        TempData["Success"] = "Відгук видалено.";
+
+        if (!string.IsNullOrEmpty(returnUrl))
+        {
+            return Redirect(returnUrl);
         }
+
+        return RedirectToAction("Details", "Shop", new { id = productId });
     }
 }

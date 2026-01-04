@@ -61,86 +61,18 @@ namespace CourseWork.Repositories
     }
 
 
-
-
-    public class BrandRepository : Repository<Brand>
-    {
-        public BrandRepository(MyDbContext context) : base(context) { }
-
-        public async Task<IEnumerable<Brand>> GetPagedAsync(int page, int pageSize)
-        {
-            return await _dbSet.OrderBy(b => b.BrandName)
-                .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-        }
-        public async Task<List<BrandStatsDto>> GetTopBrandsByRevenueAsync(int count)
-        {
-            var rawData = await _context.OrderDetails
-                .IgnoreQueryFilters()
-                .Include(od => od.Variant).ThenInclude(v => v.Product).ThenInclude(p => p.Brand)
-                .Include(od => od.Variant).ThenInclude(v => v.ProductBatches)
-                .Where(od => od.Variant.Product.Brand != null) 
-                .Select(od => new
-                {
-                    BrandName = od.Variant.Product.Brand.BrandName,
-                    quantity = od.Quantity,
-                    unitPrice = od.UnitPrice,
-                    avgPurchasePrice = od.Variant.ProductBatches.Any()
-                                       ? od.Variant.ProductBatches.Average(b => b.PurchasePrice ?? 0)
-                                       : 0
-                })
-                .ToListAsync();
-
-            var stats = rawData
-                .GroupBy(x => x.BrandName)
-                .Select(g => new BrandStatsDto
-                {
-                    BrandName = g.Key,
-                    SalesCount = g.Sum(x => x.quantity),
-                    TotalRevenue = g.Sum(x => x.unitPrice * x.quantity),
-
-                    EstimatedProfit = g.Sum(x => (x.unitPrice - x.avgPurchasePrice) * x.quantity)
-                })
-                .OrderByDescending(x => x.TotalRevenue)
-                .Take(count)
-                .ToList();
-
-            return stats;
-        }
-
-    }
-
-    public class ProductVariantRepository : Repository<ProductVariant>
-    {
-        public ProductVariantRepository(MyDbContext context) : base(context) { }
-
-        public async Task<IEnumerable<ProductVariant>> GetPagedAsync(int page, int pageSize)
-        {
-            return await _dbSet.Include(v => v.Product).Include(v => v.Weight)
-                .OrderBy(v => v.Product.Name).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-        }
-        public async Task<IEnumerable<ProductVariant>> GetVariantsWithDetailsAsync()
-        {
-            return await _dbSet
-                .Include(v => v.Product)
-                .Include(v => v.Weight)
-                .OrderBy(v => v.Product.Name)
-                .ToListAsync();
-        }
-
-        public async Task<int> GetTotalStockAsync(int variantId)
-        {
-            var today = DateOnly.FromDateTime(DateTime.Now);
-
-            return await _context.ProductBatches
-                .Where(b => b.VariantId == variantId && b.ExpiryDate > today)
-                .SumAsync(b => b.Stock);
-        }
-
-    }
-public class OrderDetailRepository : Repository<OrderDetail>
+    public class OrderDetailRepository : Repository<OrderDetail>
     {
         public OrderDetailRepository(MyDbContext context) : base(context) { }
+
+        public async Task<List<OrderDetail>> GetByOrderIdAsync(int orderId)
+        {
+            return await _context.OrderDetails
+                .Where(od => od.OrderId == orderId)
+                .ToListAsync();
+        }
     }
+
     public class OrderStatusRepository : Repository<Order> { public OrderStatusRepository(MyDbContext c) : base(c) { } }
 
     public class TypeOfProductRepository : Repository<TypeOfProduct> { public TypeOfProductRepository(MyDbContext c) : base(c) { } }

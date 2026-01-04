@@ -75,31 +75,20 @@ namespace CourseWork.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string email, string password)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            var user = await _unitOfWork.Users.GetByEmailAsync(email);
-
-            if (user == null)
+            if (!ModelState.IsValid)
             {
-                ViewBag.Error = "Користувача не знайдено.";
-                return View();
+                return View(model);
             }
 
-            bool isPasswordCorrect = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+            var user = await _unitOfWork.Users.GetByEmailAsync(model.Email);
 
-            if (!isPasswordCorrect)
+            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
             {
-                ViewBag.Error = "Невірний пароль.";
-                return View();
+                ViewBag.Error = "Невірний Email або пароль.";
+                return View(model);
             }
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.FullName),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role),
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString())
-            };
 
             await AuthenticateUser(user);
 
@@ -107,10 +96,8 @@ namespace CourseWork.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
-            else
-            {
-                return RedirectToAction("Index", "Shop");
-            }
+
+            return RedirectToAction("Index", "Shop");
         }
 
         public async Task<IActionResult> Logout()

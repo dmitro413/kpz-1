@@ -284,7 +284,6 @@
                     </button>
                 </div>
 
-                <!-- Чекбокс для показу видалених товарів -->
                 <div class="col-12 mt-2 border-top pt-2">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="showDeletedCheck" name="showDeleted" value="true" @(Model.ShowDeleted ? "checked" : "") onchange="this.form.submit()">
@@ -308,6 +307,7 @@
                                 <th style="width: 130px;">Тип</th>
                                 <th style="width: 110px;">Калорії</th>
                                 <th style="width: 25%;">Опис</th>
+                                <th style="width: 100px;">Оновлено</th>
                                 <th style="width: 160px;">Дії</th>
                             </tr>
                         </thead>
@@ -370,6 +370,9 @@
                                             <span class="text-muted">—</span>
                                         }
                                     </td>
+                                    <td class="text-center small text-muted">
+                                        @(p.UpdatedAt.HasValue ? p.UpdatedAt.Value.ToString("dd.MM HH:mm") : "—")
+                                    </td>
 
                                     <td class="text-center">
                                         <div class="btn-group" role="group">
@@ -411,7 +414,7 @@
                                                             data-bs-target="#deleteProductModal"
                                                             data-product-id="@p.ProductId"
                                                             data-product-name="@p.Name"
-                                                            title="Видалити в архів">
+                                                            title="Перемістити в архів">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 }
@@ -428,7 +431,6 @@
                 {
                     <nav aria-label="Page navigation" class="mt-4">
                         <ul class="pagination justify-content-center">
-                            <!-- Кнопка "Попередня" -->
                             <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
                                 <a class="page-link" asp-controller="Home" asp-action="Index"
                                    asp-route-page="@(Model.CurrentPage - 1)"
@@ -436,7 +438,6 @@
                                    asp-route-brandId="@Model.CurrentBrandId"
                                    asp-route-typeId="@Model.CurrentTypeId"
                                    asp-route-showDeleted="@Model.ShowDeleted">
-                                    <!-- ВАЖЛИВО -->
                                     Попередня
                                 </a>
                             </li>
@@ -450,7 +451,6 @@
                                        asp-route-brandId="@Model.CurrentBrandId"
                                        asp-route-typeId="@Model.CurrentTypeId"
                                        asp-route-showDeleted="@Model.ShowDeleted">
-                                        <!-- ВАЖЛИВО -->
                                         @i
                                     </a>
                                 </li>
@@ -463,7 +463,6 @@
                                    asp-route-brandId="@Model.CurrentBrandId"
                                    asp-route-typeId="@Model.CurrentTypeId"
                                    asp-route-showDeleted="@Model.ShowDeleted">
-                                    <!-- ВАЖЛИВО -->
                                     Наступна
                                 </a>
                             </li>
@@ -481,10 +480,17 @@
         </div>
 
         <!--ВАРІАНТИ-->
-        <div class="tab-pane fade" id="tabVariants" role="tabpanel" aria-labelledby="variant-tab">
+        <div class="tab-pane fade" id="tabVariants" role="tabpanel">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3>Варіанти (Ціни) <span class="badge bg-secondary">@Model.TotalVariants</span></h3>
-                <a asp-controller="Variants" asp-action="Create" class="btn btn-warning text-dark shadow-sm">
+
+                <form method="get" asp-action="Index" class="d-flex gap-2">
+                    <input type="hidden" name="page" value="1" />
+                    <input type="text" name="variantSearch" value="@Model.VariantSearch" class="form-control form-control-sm" placeholder="Назва товару..." style="width: 200px;">
+                    <button type="submit" class="btn btn-sm btn-dark">Знайти</button>
+                </form>
+
+                <a asp-controller="Variants" asp-action="Create" class="btn btn-warning text-dark btn-sm shadow-sm">
                     <i class="bi bi-plus-circle"></i> Додати варіант
                 </a>
             </div>
@@ -497,60 +503,48 @@
                             <th>Товар</th>
                             <th>Вага/Об'єм</th>
                             <th>Ціна (грн)</th>
+                            <th style="width: 100px;">Оновлено</th>
                             <th style="width: 140px;">Дії</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if (Model.Variants.Any())
+                        @foreach (var v in Model.Variants)
                         {
-                            foreach (var v in Model.Variants)
-                            {
-                                <tr>
-                                    <td class="text-center">@v.VariantId</td>
-                                    <td>
-                                        <strong>@(v.Product?.Name ?? "Невідомий товар")</strong>
-                                    </td>
-                                    <td>
-                                        @if (v.Weight != null)
-                                        {
-                                            <span class="badge bg-light text-dark border">
-                                                <i class="bi bi-speedometer2"></i> @v.Weight.WeightValue @v.Weight.Unit
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">—</span>
-                                        }
-                                    </td>
-                                    <td class="fw-bold text-success">
-                                        @v.Price.ToString("N2") ₴
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group" role="group">
-                                            <a asp-controller="Variants" asp-action="Edit" asp-route-id="@v.VariantId" class="btn btn-warning btn-sm" title="Редагувати">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                                <button type="button"
-                                                class="btn btn-danger btn-sm"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#deleteVariantModal"
-                                                    data-variant-id="@v.VariantId"
-                                                    data-variant-info="@v.Product?.Name (@v.Weight?.WeightValue @v.Weight?.Unit)"
-                                                    title="Видалити">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr><td colspan="5" class="text-center py-4 text-muted">Дані відсутні</td></tr>
+                            <tr>
+                                <td class="text-center">@v.VariantId</td>
+                                <td><strong>@(v.Product?.Name ?? "—")</strong></td>
+                                <td class="text-center">@v.Weight?.WeightValue @v.Weight?.Unit</td>
+                                <td class="fw-bold text-success text-center">@v.Price.ToString("N2") ₴</td>
+                                <td class="text-center small text-muted">
+                                    @(v.UpdatedAt.HasValue ? v.UpdatedAt.Value.ToString("dd.MM HH:mm") : "—")
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group">
+                                        <a asp-controller="Variants" asp-action="Edit" asp-route-id="@v.VariantId" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i></a>
+                                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteVariantModal" data-variant-id="@v.VariantId" data-variant-info="@v.Product?.Name">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>                            
+                            </tr>
                         }
                     </tbody>
                 </table>
             </div>
+
+            @if (Model.VariantTotalPages > 1)
+            {
+                <nav class="mt-3">
+                    <ul class="pagination pagination-sm justify-content-center">
+                        @for (int i = 1; i <= Model.VariantTotalPages; i++)
+                        {
+                            <li class="page-item @(Model.VariantCurrentPage == i ? "active" : "")">
+                                <a class="page-link" asp-route-variantPage="@i" asp-route-variantSearch="@Model.VariantSearch">@i</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
         </div>
         <!--ПАРТІЇ-->
         <div class="tab-pane fade" id="tabBatches" role="tabpanel" aria-labelledby="batch-tab">
@@ -625,18 +619,40 @@
                         }
                     </tbody>
                 </table>
+                @if (Model.TotalBatches > Model.PageSize)
+                {
+                    int totalBatchPages = (int)Math.Ceiling((double)Model.TotalBatches / Model.PageSize);
+                    <nav aria-label="Page navigation" class="mt-3">
+                        <ul class="pagination pagination-sm justify-content-center">
+                            @for (int i = 1; i <= totalBatchPages; i++)
+                            {
+                                <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Index", new { page = i, activeTab = "tabBatches" })">@i</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
             </div>
         </div>
         <!--Користувачі-->
         <div class="tab-pane fade" id="tabUsers" role="tabpanel">
-              @if (User.IsInRole("Admin"))
-              {
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3>Користувачі <span class="badge bg-secondary">@Model.TotalUsers</span></h3>
-                <a asp-controller="Users" asp-action="Create" class="btn btn-primary shadow-sm">
-                    <i class="bi bi-person-plus"></i> Додати
-                </a>
-            </div>
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3>Користувачі <span class="badge bg-secondary">@Model.TotalUsers</span></h3>
+
+                    <form method="get" asp-action="Index" class="d-flex gap-2">
+                        <input type="hidden" name="activeTab" value="tabUsers" />
+                        <input type="hidden" name="userPage" value="1" />
+                        <input type="text" name="userSearch" value="@Model.UserSearch" class="form-control form-control-sm" placeholder="Ім'я, Email або телефон..." style="width: 250px;">
+                        <button type="submit" class="btn btn-sm btn-dark">Знайти</button>
+                    </form>
+
+                    <a asp-controller="Users" asp-action="Create" class="btn btn-primary shadow-sm">
+                        <i class="bi bi-person-plus"></i> Додати
+                    </a>
+                </div>
 
             <div class="table-responsive shadow-sm rounded">
                 <table class="table table-bordered table-striped table-hover align-middle mb-0">
@@ -694,6 +710,20 @@
                         }
                     </tbody>
                 </table>
+                    @if (Model.TotalUsers > Model.PageSize)
+                    {
+                        int totalUserPages = (int)Math.Ceiling((double)Model.TotalUsers / Model.PageSize);
+                        <nav aria-label="Page navigation" class="mt-3">
+                            <ul class="pagination pagination-sm justify-content-center">
+                                @for (int i = 1; i <= totalUserPages; i++)
+                                {
+                                    <li class="page-item @(Context.Request.Query["userPage"] == i.ToString() || (Context.Request.Query["userPage"].Count == 0 && i == 1) ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("Index", new { userPage = i, userSearch = Model.UserSearch, activeTab = "tabUsers" })">@i</a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
             </div>
             }
             else
@@ -778,6 +808,20 @@
                         }
                     </tbody>
                 </table>
+                    @if (Model.TotalReviews > Model.PageSize)
+                    {
+                        int totalReviewPages = (int)Math.Ceiling((double)Model.TotalReviews / Model.PageSize);
+                        <nav aria-label="Page navigation" class="mt-3">
+                            <ul class="pagination pagination-sm justify-content-center">
+                                @for (int i = 1; i <= totalReviewPages; i++)
+                                {
+                                    <li class="page-item @(Model.CurrentPage == i ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("Index", new { page = i, activeTab = "tabReviews" })">@i</a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
             </div>
             }
             else
@@ -797,6 +841,24 @@
         <div class="tab-pane fade" id="tabOrders" role="tabpanel">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3>Замовлення</h3>
+
+                <form method="get" asp-action="Index" class="d-flex gap-2">
+                    <input type="hidden" name="activeTab" value="tabOrders" />
+                    <input type="hidden" name="page" value="1" />
+
+                    <select name="orderStatusId" class="form-select form-select-sm" style="width: 150px;">
+                        <option value="">-- Всі статуси --</option>
+                        @foreach (var s in Model.OrderStatuses)
+                        {
+                            <option value="@s.StatusId" selected="@(Model.CurrentOrderStatusId == s.StatusId)">
+                                @s.StatusName
+                            </option>
+                        }
+                    </select>
+
+                    <input type="text" name="orderSearch" value="@Model.OrderSearch" class="form-control form-control-sm" placeholder="№, ім'я або телефон..." style="width: 200px;">
+                    <button type="submit" class="btn btn-sm btn-dark">Знайти</button>
+                </form>
             </div>
 
             <div class="table-responsive shadow-sm rounded">
@@ -829,7 +891,7 @@
                                         <input type="hidden" name="orderId" value="@o.OrderId" />
                                         <select name="statusId" class="form-select form-select-sm"
                                                 onchange="this.form.submit()"
-                                                style="width: 130px; border-color: @(o.StatusId == 4 ? "green" : "orange")">
+                                                style="width: 130px; border-color: @(o.StatusId == 3 ? "green" : "orange")">
                                             @foreach (var s in Model.OrderStatuses)
                                             {
                                                 <option value="@s.StatusId" selected="@(s.StatusId == o.StatusId)">
@@ -840,9 +902,20 @@
                                     </form>
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-info text-white" type="button" data-bs-toggle="collapse" data-bs-target="#details-@o.OrderId">
-                                        Деталі
-                                    </button>
+                                    <div class="d-flex gap-1">
+                                        <button class="btn btn-sm btn-info text-white" type="button" data-bs-toggle="collapse" data-bs-target="#details-@o.OrderId">
+                                            Деталі
+                                        </button>
+
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <button type="button" class="btn btn-sm btn-danger"
+                                                    data-bs-toggle="modal" data-bs-target="#deleteOrderModal"
+                                                    data-order-id="@o.OrderId">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        }
+                                    </div>
                                 </td>
                             </tr>
                             <tr class="collapse bg-light" id="details-@o.OrderId">
@@ -861,7 +934,30 @@
                     </tbody>
                 </table>
             </div>
+
+            @if (Model.OrderTotalPages > 1)
+            {
+                <nav class="mt-3">
+                    <ul class="pagination pagination-sm justify-content-center">
+                        @for (int i = 1; i <= Model.OrderTotalPages; i++)
+                        {
+                            <li class="page-item @(Model.OrderCurrentPage == i ? "active" : "")">
+                                <a class="page-link"
+                                   href="@Url.Action("Index", new {
+                           orderPage = i,
+                           orderSearch = Model.OrderSearch,
+                           orderStatusId = Model.CurrentOrderStatusId, 
+                           activeTab = "tabOrders"
+                       })">@i</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
         </div>
+
+
+ 
         
       
         <!--АНАЛІТИКА-->
@@ -1068,6 +1164,10 @@
                 </div>                
             </div>
         </div>
+    </div>
+</div>
+
+
 
 
 <!--МОДАЛЬНІ ВІКНА-->
@@ -1122,27 +1222,40 @@
     </div>
 </div>
 <!--Видалення Продукту-->
-<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Видалення Товару</h5>
+                <h5 class="modal-title" id="deleteProductLabel">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Видалення товару
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <p>Ви впевнені, що хочете видалити цей товар?</p>
-                <h4 class="text-center text-danger" id="deleteProductName"></h4>
-                <p class="text-muted small text-center mt-2">Картинка також буде видалена (або товар буде переміщено в архів).</p>
-            </div>
-                    <<div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                        <form id="deleteProductForm" method="post">
-                            @Html.AntiForgeryToken()
-
-                            <input type="hidden" name="showDeleted" value="@Model.ShowDeleted.ToString().ToLower()" />
-                            <button type="submit" class="btn btn-danger">Видалити</button>
-                        </form>
+            <div class="modal-body text-center">
+                <p class="fs-5">Ви впевнені, що хочете видалити цей товар?</p>
+                
+                <h3 class="text-danger fw-bold my-3" id="modalProductName"></h3>
+                
+                <div class="alert alert-warning d-flex align-items-center" role="alert">
+                    <i class="bi bi-info-circle-fill me-2 fs-4"></i>
+                    <div class="text-start small">
+                        Товар буде переміщено в <strong>Архів</strong>. <br/>
+                        Він зникне з магазину, але залишиться в базі даних.
                     </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Скасувати</button>
+                
+                <form id="deleteProductForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="showDeleted" value="@Model.ShowDeleted.ToString().ToLower()" />
+                    
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="bi bi-trash"></i> Видалити
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -1261,6 +1374,30 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
                 <form id="deleteReviewForm" method="post">
                     @Html.AntiForgeryToken()
+                    <input type="hidden" name="returnUrl" value="/Home/Index" /> 
+                    <button type="submit" class="btn btn-danger">Видалити</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Видалення Замовлення -->
+<div class="modal fade" id="deleteOrderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Видалення замовлення</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p>Ви впевнені, що хочете видалити це замовлення?</p>
+                <h5 class="text-danger" id="delOrderNum"></h5>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                <form id="deleteOrderForm" method="post" asp-controller="Orders" asp-action="Delete">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="delOrderIdInput" />
                     <button type="submit" class="btn btn-danger">Видалити</button>
                 </form>
             </div>
@@ -1295,14 +1432,19 @@
             });
         }
 
-                const deleteProductModal = document.getElementById('deleteProductModal');
+        const deleteProductModal = document.getElementById('deleteProductModal');
         if (deleteProductModal) {
             deleteProductModal.addEventListener('show.bs.modal', function (event) {
                 const button = event.relatedTarget;
-                const id = button.getAttribute('data-product-id');
-                const name = button.getAttribute('data-product-name');
-                document.getElementById('deleteProductName').textContent = name;
-                document.getElementById('deleteProductForm').action = '/Products/Delete/' + id;
+                
+                const productId = button.getAttribute('data-product-id');
+                const productName = button.getAttribute('data-product-name');
+                
+                const modalName = deleteProductModal.querySelector('#modalProductName');
+                const deleteForm = deleteProductModal.querySelector('#deleteProductForm');
+                modalName.textContent = productName;
+                
+                deleteForm.action = '/Products/Delete/' + productId;
             });
         }
 
@@ -1373,5 +1515,28 @@
               document.getElementById('deleteBatchForm').action = '/Batches/Delete/' + id;
               });
         }
+        const deleteOrderModal = document.getElementById('deleteOrderModal');
+        if (deleteOrderModal) {
+            deleteOrderModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget; 
+            const id = button.getAttribute('data-order-id'); 
+
+            document.getElementById('delOrderNum').textContent = '#' + id;
+            document.getElementById('delOrderIdInput').value = id;
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeTabId = urlParams.get('activeTab');
+
+            if (activeTabId) {
+                const tabButton = document.querySelector(`button[data-bs-target="#${activeTabId}"]`);
+                if (tabButton) {
+                    var tab = new bootstrap.Tab(tabButton);
+                    tab.show();
+                }
+            }
+        });
     </script>
-}
+} 

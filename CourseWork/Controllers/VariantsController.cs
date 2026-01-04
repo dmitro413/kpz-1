@@ -142,7 +142,12 @@ namespace CourseWork.Controllers
             var weights = await _unitOfWork.Weights.GetAllAsync();
 
             ViewBag.ProductId = new SelectList(products, "ProductId", "Name", selectedProduct);
-            ViewBag.WeightId = new SelectList(weights, "WeightId", "WeightValue", selectedWeight);
+            var weightItems = weights.Select(w => new
+            {
+                w.WeightId,
+                DisplayText = $"{w.WeightValue} {w.Unit}" 
+            });
+            ViewBag.WeightId = new SelectList(weightItems, "WeightId", "DisplayText", selectedWeight);
         }
     }
 }

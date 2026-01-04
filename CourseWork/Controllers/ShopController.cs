@@ -1,9 +1,10 @@
 ﻿using CourseWork.Data;
 using CourseWork.Models;
-using CourseWork.Repositories; 
+using CourseWork.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+
 namespace CourseWork.Controllers
 {
     public class ShopController : Controller
@@ -15,26 +16,15 @@ namespace CourseWork.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IActionResult> Index(string searchString,int? brandId,int? typeId,int? minRating,
-        string sortOrder = "newest")
+        public async Task<IActionResult> Index(string searchString, int? brandId, int? typeId, int? minRating, string sortOrder = "newest", int page = 1)
         {
-            IEnumerable<Product> products;
 
-            if (brandId.HasValue && minRating.HasValue)
+            int pageSize = 12;
+
+            var (products, totalCount) = await ((ProductRepository)_unitOfWork.Products).GetShopProductsAsync(searchString, brandId, typeId, sortOrder, page, pageSize, minRating);
+            if (minRating.HasValue)
             {
-                products = await ((ProductRepository)_unitOfWork.Products).GetByBrandAndRatingSP(brandId.Value, minRating.Value);
-
-                if (!string.IsNullOrEmpty(searchString))
-                    products = products.Where(p => p.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase));
-            }
-            else
-            {
-                products = await ((ProductRepository)_unitOfWork.Products).GetShopProductsAsync(searchString, brandId, typeId, sortOrder);
-
-                if (minRating.HasValue)
-                {
-                    products = products.Where(p => p.AggregateRating >= minRating.Value);
-                }
+                products = products.Where(p => p.AggregateRating >= minRating.Value);
             }
 
             ViewBag.Brands = await _unitOfWork.Brands.GetAllAsync();
@@ -45,6 +35,10 @@ namespace CourseWork.Controllers
             ViewBag.CurrentBrand = brandId;
             ViewBag.CurrentType = typeId;
             ViewBag.CurrentRating = minRating;
+
+            ViewBag.CurrentPage = page;
+
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
             return View("IndexSHOP", products);
         }
@@ -70,11 +64,10 @@ namespace CourseWork.Controllers
             }
 
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
+
             if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
             {
-                 // Тимчасово для тесту, якщо Identity ще не налаштовано повністю:
-                 userId = 1; 
+                return RedirectToAction("Login", "Account");
             }
 
             var review = new Review
@@ -90,15 +83,12 @@ namespace CourseWork.Controllers
             {
                 await _unitOfWork.Reviews.AddAsync(review);
                 await _unitOfWork.SaveAsync();
-                TempData["Success"] = "Дякуємо за ваш відгук!";
             }
             catch (Exception)
             {
-                // Швидше за все спрацював UNIQUE constraint (один відгук на один товар)
                 TempData["Error"] = "Ви вже залишали відгук на цей товар.";
             }
 
-            // Повертаємо користувача назад на сторінку товару, щоб він побачив свій відгук
             return RedirectToAction("Details", new { id = productId });
         }
     }

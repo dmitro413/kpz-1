@@ -22,14 +22,11 @@ public partial class MyDbContext : DbContext
     public virtual DbSet<ProductBatch> ProductBatches { get; set; }
     public virtual DbSet<ProductVariant> ProductVariants { get; set; }
     public virtual DbSet<Review> Reviews { get; set; }
-    public virtual DbSet<SchemaVersion> SchemaVersions { get; set; }
     public virtual DbSet<TypeOfProduct> TypeOfProducts { get; set; }
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<Weight> Weights { get; set; }
-    public virtual DbSet<LowStockProductDto> LowStockProducts { get; set; }
 
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)=> optionsBuilder.UseSqlServer("Server=DESKTOP-2788V47;Database=SweetShop;Trusted_Connection=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -168,11 +165,7 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.StatusId).HasColumnName("StatusID"); entity.Property(e => e.Description).HasMaxLength(250); 
             entity.Property(e => e.StatusName).HasMaxLength(50); 
         });
-        modelBuilder.Entity<SchemaVersion>(entity => { 
-            entity.HasKey(e => e.Id).HasName("PK__SchemaVe__3214EC07CFE87422"); 
-            entity.Property(e => e.ScriptHash).HasMaxLength(64); 
-            entity.Property(e => e.ScriptName).HasMaxLength(255); 
-        });
+       
         modelBuilder.Entity<TypeOfProduct>(entity => { 
             entity.HasKey(e => e.TypeOfProductId).HasName("PK__TypeOfPr__4FE05BB597A2FF5D"); 
             entity.ToTable("TypeOfProduct"); entity.HasIndex(e => e.TypeOfProductName, "UQ__TypeOfPr__2B8BAA28D2EBD8E3").IsUnique(); 

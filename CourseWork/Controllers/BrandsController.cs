@@ -56,18 +56,25 @@ namespace CourseWork.Controllers
             if (!ModelState.IsValid)
                 return View("~/Views/Home/FormBrand.cshtml", brand);
 
+            try
+            {
+                var existing = await _unitOfWork.Brands.GetByIdAsync(brand.BrandId);
+                if (existing == null) return NotFound();
 
-            var existing = await _unitOfWork.Brands.GetByIdAsync(brand.BrandId);
-            if (existing == null) return NotFound();
+                existing.BrandName = brand.BrandName;
+                existing.Country = brand.Country;
 
-            existing.BrandName = brand.BrandName;
-            existing.Country = brand.Country;
+                _unitOfWork.Brands.Update(existing);
+                await _unitOfWork.SaveAsync();
 
-            _unitOfWork.Brands.Update(existing);
-            await _unitOfWork.SaveAsync();
-
-            TempData["Success"] = "Бренд оновлено.";
-            return RedirectToAction("Index", "Home");
+                TempData["Success"] = "Бренд оновлено.";
+                return RedirectToAction("Index", "Home");
+            }
+            catch (DbUpdateException)
+            {
+                ModelState.AddModelError("BrandName", "Бренд з такою назвою вже існує.");
+                return View("~/Views/Home/FormBrand.cshtml", brand);
+            }
         }
         [Authorize(Roles = "Admin")]
         [HttpPost]

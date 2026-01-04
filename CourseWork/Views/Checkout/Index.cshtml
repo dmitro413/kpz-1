@@ -1,7 +1,13 @@
-﻿@model CourseWork.Models.Order
+﻿@using CourseWork.Extensions
+@using CourseWork.Models
+@model CourseWork.Models.Order
+@inject IHttpContextAccessor HttpContextAccessor
+
 @{
     ViewData["Title"] = "Оформлення замовлення";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    int totalCount = ViewBag.CartTotalCount ?? 0;
+    decimal totalPrice = ViewBag.CartTotalPrice ?? 0;
 }
 
 <div class="container mt-4">
@@ -12,30 +18,47 @@
                     <h4 class="mb-0"><i class="bi bi-truck"></i> Оформлення доставки</h4>
                 </div>
                 <div class="card-body">
-                    <form asp-action="CreateOrder" method="post">
+                    <form asp-action="CreateOrder" method="post" id="checkoutForm">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
                         <div class="mb-3">
-                            <label class="form-label">Ваше ім'я</label>
-                            <input asp-for="CustomerName" class="form-control" required />
+                            <label asp-for="CustomerName" class="form-label fw-bold">
+                                Ваше ім'я <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="CustomerName" class="form-control" placeholder="Іван Іванов" />
+                            <span asp-validation-for="CustomerName" class="text-danger small"></span>
                         </div>
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Телефон</label>
-                                <input asp-for="CustomerPhone" class="form-control" required />
+                                <label asp-for="CustomerPhone" class="form-label fw-bold">
+                                    Телефон <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="CustomerPhone" class="form-control" placeholder="+380..." />
+                                <span asp-validation-for="CustomerPhone" class="text-danger small"></span>
                             </div>
+
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Email</label>
-                                <input asp-for="CustomerEmail" class="form-control" required />
+                                <label asp-for="CustomerEmail" class="form-label fw-bold">
+                                    Email <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="CustomerEmail" class="form-control" type="email" placeholder="name@example.com" />
+                                <span asp-validation-for="CustomerEmail" class="text-danger small"></span>
                             </div>
                         </div>
+
                         <div class="mb-4">
-                            <label class="form-label">Адреса доставки (або Нова Пошта)</label>
-                            <textarea asp-for="DeliveryAddress" class="form-control" rows="3" required placeholder="м. Київ, вул. Хрещатик 1..."></textarea>
+                            <label asp-for="DeliveryAddress" class="form-label fw-bold">
+                                Адреса доставки <span class="text-danger">*</span>
+                            </label>
+                            <textarea asp-for="DeliveryAddress" class="form-control" rows="3" placeholder="м. Київ, Нова Пошта №1, або вулиця та будинок"></textarea>
+                            <span asp-validation-for="DeliveryAddress" class="text-danger small"></span>
                         </div>
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-success btn-lg">Підтвердити замовлення</button>
+                            <button type="button" class="btn btn-success btn-lg" onclick="validateAndShowModal()">
+                                Підтвердити замовлення
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -43,3 +66,49 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="confirmOrderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-check2-circle"></i> Підтвердження</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="fs-5">Ви впевнені, що хочете оформити замовлення?</p>
+                <div class="alert alert-light border">
+                    <p class="mb-1">Кількість товарів: <strong>@totalCount шт.</strong></p>
+                    <p class="mb-0 fs-4 fw-bold text-success">Сума: @totalPrice.ToString("N0") ₴</p>
+                </div>
+                <p class="text-muted small">Після підтвердження менеджер зв'яжеться з вами.</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Ні, ще перевірю</button>
+
+                <button type="button" class="btn btn-success px-4" onclick="submitForm()">
+                    Так, замовляю!
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function validateAndShowModal() {
+            var form = $('#checkoutForm');
+            if (form.valid()) {
+                var myModal = new bootstrap.Modal(document.getElementById('confirmOrderModal'));
+                myModal.show();
+            }
+        }
+
+        function submitForm() {
+            $('#checkoutForm').submit();
+        }
+    </script>
+}

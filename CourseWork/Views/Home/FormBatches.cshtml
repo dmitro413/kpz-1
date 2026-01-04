@@ -27,7 +27,7 @@
 
                         <div class="mb-3">
                             <label asp-for="VariantId" class="form-label fw-bold">Товар (Варіант)</label>
-                            <select asp-for="VariantId" class="form-select" asp-items="ViewBag.VariantId">
+                            <select asp-for="VariantId" class="form-select select-search" asp-items="ViewBag.VariantId">
                                 <option value="">-- Оберіть товар зі списку --</option>
                             </select>
                             <span asp-validation-for="VariantId" class="text-danger"></span>

@@ -30,7 +30,7 @@
 
                         <div class="mb-3">
                             <label asp-for="ProductId" class="form-label">Товар</label>
-                            <select asp-for="ProductId" class="form-select" asp-items="ViewBag.ProductId">
+                            <select asp-for="ProductId" class="form-select select-search" asp-items="ViewBag.ProductId">
                                 <option value="">-- Оберіть товар --</option>
                             </select>
                             <span asp-validation-for="ProductId" class="text-danger"></span>

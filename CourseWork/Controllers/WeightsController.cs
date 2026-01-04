@@ -57,17 +57,24 @@ namespace CourseWork.Controllers
         {
             if (ModelState.IsValid)
             {
-                var existing = await _unitOfWork.Weights.GetByIdAsync(weight.WeightId);
-                if (existing != null)
+                try
                 {
-                    existing.WeightValue = weight.WeightValue;
-                    existing.Unit = weight.Unit;
+                    var existing = await _unitOfWork.Weights.GetByIdAsync(weight.WeightId);
+                    if (existing != null)
+                    {
+                        existing.WeightValue = weight.WeightValue;
+                        existing.Unit = weight.Unit;
 
-                    _unitOfWork.Weights.Update(existing);
-                    await _unitOfWork.SaveAsync();
+                        _unitOfWork.Weights.Update(existing);
+                        await _unitOfWork.SaveAsync();
 
-                    TempData["Success"] = "Вагу оновлено.";
-                    return RedirectToAction("Index", "Home");
+                        TempData["Success"] = "Вагу оновлено.";
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
+                catch (DbUpdateException)
+                {
+                    ModelState.AddModelError("", "Така комбінація ваги та одиниці виміру вже існує.");
                 }
             }
             return View("~/Views/Home/FormWeight.cshtml", weight);

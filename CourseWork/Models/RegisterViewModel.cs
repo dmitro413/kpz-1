@@ -11,6 +11,7 @@ namespace CourseWork.Models
         [Display(Name = "Email")]
         [Required(ErrorMessage = "Введіть Email")]
         [EmailAddress(ErrorMessage = "Некоректний Email")]
+        [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Email повинен містити домен верхнього рівня, напр. .com")]
         public string Email { get; set; } = string.Empty;
 
         [Display(Name = "Телефон")]
