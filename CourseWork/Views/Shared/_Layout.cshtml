@@ -1,6 +1,8 @@
 ﻿@using CourseWork.Extensions
 @using CourseWork.Models
 @inject IHttpContextAccessor HttpContextAccessor
+@using CourseWork.Constants
+
 
 @{
     var cart = HttpContextAccessor.HttpContext.Session.GetObject<List<CartItem>>("Cart");
@@ -88,8 +90,7 @@
                         </a>
 
                         <div class="d-grid gap-2">
-                            @if (User.IsInRole("Admin") || User.IsInRole("
-"))
+                            @if (User.IsInRole(UserRoles.Admin) || User.IsInRole(UserRoles.Manager))
                             {
                                 <a asp-controller="Home" asp-action="Index" class="btn btn-warning btn-sm">
                                     <i class="bi bi-speedometer2"></i> Адмін-панель
