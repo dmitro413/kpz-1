@@ -6,11 +6,9 @@ namespace CourseWork.Repositories
 {
     public class ProductRepository : Repository<Product>
     {
-        private readonly MyDbContext _context;
-
+    
         public ProductRepository(MyDbContext context) : base(context)
         {
-            _context = context;
         }
         public async Task<(IEnumerable<Product> Items, int TotalCount)> GetFilteredAsync(
              int page,
