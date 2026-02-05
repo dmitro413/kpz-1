@@ -1,4 +1,5 @@
-﻿using CourseWork.Data;
+﻿using CourseWork.Constants;
+using CourseWork.Data;
 using CourseWork.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -69,7 +70,7 @@ namespace CourseWork.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> Edit(User user)
         {
             ModelState.Remove("PasswordHash");

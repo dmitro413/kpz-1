@@ -1,13 +1,14 @@
+using CourseWork.Constants;
 using CourseWork.Data;
 using CourseWork.Models;
+using CourseWork.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Authorization;
-using CourseWork.Repositories;
 
 namespace CourseWork.Controllers
 {
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = UserRoles.AdminOrManager)]
     public class HomeController : Controller
     {
         private readonly UnitOfWork _unitOfWork;

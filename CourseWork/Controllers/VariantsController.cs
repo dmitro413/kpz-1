@@ -1,13 +1,14 @@
-﻿using CourseWork.Models;
+﻿using CourseWork.Constants;
 using CourseWork.Data;
+using CourseWork.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 
 namespace CourseWork.Controllers
 {
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = UserRoles.AdminOrManager)]
     public class VariantsController : Controller
     {
         private readonly UnitOfWork _unitOfWork;

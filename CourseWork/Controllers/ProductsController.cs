@@ -1,14 +1,15 @@
-﻿using CourseWork.Models;
+﻿using CourseWork.Constants;
 using CourseWork.Data;
+using CourseWork.Models;
+using CourseWork.Repositories; 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-using CourseWork.Repositories; 
 
 namespace CourseWork.Controllers
 {
-    [Authorize(Roles = "Admin,Manager")] 
+    [Authorize(Roles = UserRoles.AdminOrManager)]
     public class ProductsController : Controller
     {
         private readonly UnitOfWork _unitOfWork;
@@ -106,7 +107,7 @@ namespace CourseWork.Controllers
             TempData["Success"] = "Продукт оновлено.";
             return RedirectToAction("Index", "Home");
         }
-        [Authorize(Roles = "Admin,Manager")]
+        [Authorize(Roles = UserRoles.AdminOrManager)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id, bool showDeleted = false)
@@ -133,7 +134,7 @@ namespace CourseWork.Controllers
             }
             return RedirectToAction("Index", "Home", new { showDeleted = showDeleted });
         }
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(int id, bool showDeleted = false)
@@ -152,12 +153,13 @@ namespace CourseWork.Controllers
 
             return RedirectToAction("Index", "Home", new { showDeleted = showDeleted });
         }
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> HardDelete(int id)
         {
-            var product = await ((ProductRepository)_unitOfWork.Products).GetByIdIncludingDeletedAsync(id);
+            var product = await _unitOfWork.Products.GetByIdIncludingDeletedAsync(id);
+
 
             if (product != null)
             {
@@ -255,7 +257,6 @@ namespace CourseWork.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Помилка видалення файлу {imageUrl}: {ex.Message}");
             }
         }
 

@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using CourseWork.Data;
 using CourseWork.Models;
+using CourseWork.Constants;
+
 namespace CourseWork.Controllers
 {
     public class AccountController : Controller
@@ -118,7 +120,7 @@ namespace CourseWork.Controllers
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
         }
-
+            
         public IActionResult AccessDenied()
         {
             return View();

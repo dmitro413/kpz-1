@@ -1,10 +1,11 @@
-﻿using CourseWork.Data;
+﻿using CourseWork.Constants;
+using CourseWork.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CourseWork.Controllers
 {
-    [Authorize(Roles = "Admin,Manager")] 
+    [Authorize(Roles = UserRoles.AdminOrManager)]
     public class OrdersController : Controller
     {
         private readonly UnitOfWork _unitOfWork;

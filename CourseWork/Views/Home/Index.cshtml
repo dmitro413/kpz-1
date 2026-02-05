@@ -599,6 +599,9 @@
                                         }
                                     </td>
                                     <td class="text-center">
+                                        <a asp-controller="Batches" asp-action="Edit" asp-route-id="@b.BatchId" class="btn btn-warning btn-sm me-1" title="Редагувати">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
                                         <button type="button" class="btn btn-danger btn-sm"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#deleteBatchModal"
@@ -906,15 +909,11 @@
                                         <button class="btn btn-sm btn-info text-white" type="button" data-bs-toggle="collapse" data-bs-target="#details-@o.OrderId">
                                             Деталі
                                         </button>
-
-                                        @if (User.IsInRole("Admin"))
-                                        {
                                             <button type="button" class="btn btn-sm btn-danger"
                                                     data-bs-toggle="modal" data-bs-target="#deleteOrderModal"
                                                     data-order-id="@o.OrderId">
                                                 <i class="bi bi-trash"></i>
                                             </button>
-                                        }
                                     </div>
                                 </td>
                             </tr>

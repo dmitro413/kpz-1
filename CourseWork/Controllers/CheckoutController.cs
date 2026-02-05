@@ -1,4 +1,5 @@
-﻿using CourseWork.Data;
+﻿using CourseWork.Constants;
+using CourseWork.Data;
 using CourseWork.Extensions;
 using CourseWork.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ namespace CourseWork.Controllers
     public class CheckoutController : Controller
     {
         private readonly UnitOfWork _unitOfWork;
-        private const string CartKey = "Cart";
+        private const string CartKey = SessionConstants.CartKey;
 
         public CheckoutController(UnitOfWork unitOfWork)
         {

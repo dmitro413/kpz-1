@@ -1,12 +1,13 @@
-﻿using CourseWork.Models;
+﻿using CourseWork.Constants;
 using CourseWork.Data;
+using CourseWork.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 
 namespace CourseWork.Controllers
 {
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = UserRoles.AdminOrManager)]
 
     public class BrandsController : Controller
     {
@@ -76,7 +77,7 @@ namespace CourseWork.Controllers
                 return View("~/Views/Home/FormBrand.cshtml", brand);
             }
         }
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
