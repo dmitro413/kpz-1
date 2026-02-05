@@ -86,25 +86,41 @@ namespace CourseWork.Controllers
             var cart = HttpContext.Session.GetObject<List<CartItem>>(CartKey);
             if (cart == null || !cart.Any()) return RedirectToAction("Index", "Cart");
 
-            for (int i = cart.Count - 1; i >= 0; i--)
+            var stockError = await ValidateStockAvailability(cart);
+            if (stockError != null)
             {
-                var item = cart[i];
-                if (item.Quantity <= 0)
-                {
-                    cart.RemoveAt(i);
-                    HttpContext.Session.SetObject(CartKey, cart);
-                    TempData["Error"] = "Некоректна кількість товару.";
-                    return RedirectToAction("Index", "Cart");
-                }
+                TempData["Error"] = stockError;
+                return RedirectToAction("Index", "Cart");
+            }
 
+            try
+            {
+                var order = PrepareOrderEntity(orderModel);
+                await SaveOrderWithDetails(order, cart);
+                HttpContext.Session.Remove(CartKey);
+                return View("Success");
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "Помилка при створенні замовлення. Спробуйте пізніше.";
+                return RedirectToAction("Index", "Cart");
+            }
+        }
+        private async Task<string?> ValidateStockAvailability(List<CartItem> cart)
+        {
+            foreach (var item in cart)
+            {
                 int availableStock = await _unitOfWork.ProductVariants.GetTotalStockAsync(item.VariantId);
                 if (item.Quantity > availableStock)
                 {
-                    TempData["Error"] = $"Товару '{item.ProductName}' недостатньо для завершення замовлення.";
-                    return RedirectToAction("Index", "Cart");
+                    return $"Товару '{item.ProductName}' недостатньо для завершення замовлення.";
                 }
             }
+            return null;
+        }
 
+        private Order PrepareOrderEntity(Order model)
+        {
             int? userId = null;
             if (User.Identity.IsAuthenticated)
             {
@@ -112,47 +128,39 @@ namespace CourseWork.Controllers
                 if (int.TryParse(userIdStr, out int parsedId)) userId = parsedId;
             }
 
-            var order = new Order
+            return new Order
             {
                 UserId = userId,
                 OrderDate = DateTime.UtcNow,
                 StatusId = 1,
-                CustomerName = orderModel.CustomerName,
-                CustomerEmail = orderModel.CustomerEmail,
-                CustomerPhone = orderModel.CustomerPhone,
-                DeliveryAddress = orderModel.DeliveryAddress,
+                CustomerName = model.CustomerName,
+                CustomerEmail = model.CustomerEmail,
+                CustomerPhone = model.CustomerPhone,
+                DeliveryAddress = model.DeliveryAddress,
                 DeliveryDate = DateTime.UtcNow.AddDays(4),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
+        }
 
-            try
+        private async Task SaveOrderWithDetails(Order order, List<CartItem> cart)
+        {
+            await _unitOfWork.Orders.AddAsync(order);
+
+            foreach (var item in cart)
             {
-                await _unitOfWork.Orders.AddAsync(order);
+                await _unitOfWork.ProductBatches.DecreaseStockAsync(item.VariantId, item.Quantity);
 
-                foreach (var item in cart)
+                var detail = new OrderDetail
                 {
-                    await _unitOfWork.ProductBatches.DecreaseStockAsync(item.VariantId, item.Quantity);
-
-                    var detail = new OrderDetail
-                    {
-                        Order = order,
-                        VariantId = item.VariantId,
-                        Quantity = item.Quantity,
-                        UnitPrice = item.Price
-                    };
-                    await _unitOfWork.OrderDetails.AddAsync(detail);
-                }
-
-                await _unitOfWork.SaveAsync();
-                HttpContext.Session.Remove(CartKey);
-                return View("Success");
+                    Order = order,
+                    VariantId = item.VariantId,
+                    Quantity = item.Quantity,
+                    UnitPrice = item.Price
+                };
+                await _unitOfWork.OrderDetails.AddAsync(detail);
             }
-            catch (Exception)
-            {
-                TempData["Error"] = "Помилка при створенні замовлення. Можливо, товар закінчився.";
-                return RedirectToAction("Index", "Cart");
-            }
+            await _unitOfWork.SaveAsync();
         }
     }
 }
