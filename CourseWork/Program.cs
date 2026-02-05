@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using CourseWork.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using System.Globalization; 
-
+using System.Globalization;
+using CourseWork.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,8 +15,9 @@ builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<UnitOfWork>();
-
+builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddControllersWithViews();
+
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

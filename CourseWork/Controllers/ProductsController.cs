@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using CourseWork.Services;
+
 
 namespace CourseWork.Controllers
 {
@@ -14,11 +16,13 @@ namespace CourseWork.Controllers
     {
         private readonly UnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IFileService _fileService;
 
-        public ProductsController(UnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+        public ProductsController(UnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, IFileService fileService)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
+            _fileService = fileService;
         }
         [HttpGet]
         public async Task<IActionResult> Create()
@@ -40,7 +44,7 @@ namespace CourseWork.Controllers
                 return View("~/Views/Home/FormProduct.cshtml", product);
             }
 
-            product.ImageUrl = await SaveImageAsync(imageFile);
+            product.ImageUrl = await _fileService.SaveProductImageAsync(imageFile);
 
             product.CreatedAt = DateTime.UtcNow;
             product.UpdatedAt = DateTime.UtcNow;
@@ -90,15 +94,10 @@ namespace CourseWork.Controllers
 
             if (imageFile != null && imageFile.Length > 0)
             {
-                string newPath = await SaveImageAsync(imageFile);
+                string oldPath = existing.ImageUrl;
+                existing.ImageUrl = await _fileService.SaveProductImageAsync(imageFile);
 
-                if (newPath != "/images/no-image.png")
-                {
-                    string oldPath = existing.ImageUrl;
-                    existing.ImageUrl = newPath;
-
-                    DeleteImageFile(oldPath);
-                }
+                _fileService.DeleteFile(oldPath);
             }
 
             _unitOfWork.Products.Update(existing);
@@ -165,7 +164,7 @@ namespace CourseWork.Controllers
             {
                 try
                 {
-                    DeleteImageFile(product.ImageUrl);
+                    _fileService.DeleteFile(product.ImageUrl);
 
                     var reviews = await _unitOfWork.Reviews.GetByProductIdAsync(id); 
                     foreach (var review in reviews)
@@ -201,65 +200,7 @@ namespace CourseWork.Controllers
             return RedirectToAction("Index", "Home", new { showDeleted = true });
         }
 
-        private async Task<string> SaveImageAsync(IFormFile imageFile)
-        {
-            if (imageFile != null && imageFile.Length > 0)
-            {
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
-                var extension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
-
-                if (!allowedExtensions.Contains(extension))
-                {
-                    return "/images/no-image.png";
-                }
-                if (imageFile.Length > 5 * 1024 * 1024)
-                {
-                    return "/images/no-image.png";
-                }
-
-                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "products");
-
-                if (!Directory.Exists(uploadsFolder))
-                {
-                    Directory.CreateDirectory(uploadsFolder);
-                }
-
-                string uniqueFileName = Guid.NewGuid().ToString() + extension;
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await imageFile.CopyToAsync(fileStream);
-                }
-
-                return "/images/products/" + uniqueFileName;
-            }
-
-            return "/images/no-image.png";
-        }
-
-        private void DeleteImageFile(string imageUrl)
-        {
-            if (string.IsNullOrEmpty(imageUrl) || imageUrl == "/images/no-image.png")
-            {
-                return;
-            }
-
-            try
-            {
-                string relativePath = imageUrl.TrimStart('/');
-                string fullPath = Path.Combine(_webHostEnvironment.WebRootPath, relativePath);
-
-                if (System.IO.File.Exists(fullPath))
-                {
-                    System.IO.File.Delete(fullPath);
-                }
-            }
-            catch (Exception ex)
-            {
-            }
-        }
-
+       
 
         private async Task PopulateDropdowns(int? brandId = null, int? typeId = null)
         {
