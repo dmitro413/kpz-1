@@ -1,116 +1,128 @@
-using CourseWork.Constants;
 using CourseWork.Data;
 using CourseWork.Models;
-using CourseWork.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace CourseWork.Controllers
+[Authorize(Roles = "Admin,Manager")]
+public class HomeController : Controller
 {
-    [Authorize(Roles = UserRoles.AdminOrManager)]
-    public class HomeController : Controller
+    private readonly UnitOfWork _unitOfWork;
+
+    public HomeController(UnitOfWork unitOfWork)
     {
-        private readonly UnitOfWork _unitOfWork;
+        _unitOfWork = unitOfWork;
+    }
 
-        public HomeController(UnitOfWork unitOfWork)
+    public async Task<IActionResult> Index(DashboardFilter filter)
+    {
+        const int pageSize = 10;
+
+        //Отримання даних для Товарів
+        var productData = await _unitOfWork.Products.GetFilteredAsync(
+            filter.Page,
+            pageSize,
+            filter.SearchString,
+            filter.BrandId,
+            filter.TypeId,
+            filter.ShowDeleted);
+
+        //Отримання даних для Замовлень
+        var (orderItems, orderTotal) = await _unitOfWork.Orders.GetFilteredOrdersAsync(
+            filter.OrderPage,
+            pageSize,
+            filter.OrderSearch ?? "",
+            filter.OrderStatusId);
+
+        //Отримання даних для Користувачів
+        var (userItems, userTotal) = await _unitOfWork.Users.GetFilteredUsersAsync(
+            filter.UserPage,
+            pageSize,
+            filter.UserSearch ?? "");
+
+        //Отримання варіантів з пошуком 
+        var (variantItems, variantTotal) = await _unitOfWork.ProductVariants.GetFilteredVariantsAsync(
+            filter.VariantPage,
+            pageSize,
+            filter.VariantSearch ?? "");
+
+        //Налаштування та отримання Звітів (використовуємо значення з фільтра або дефолтні)
+        int actualTopCount = filter.ReportTopCount ?? 5;
+        int actualLowStock = filter.ReportLowStock ?? 10;
+        int actualDaysExpiry = filter.ReportDaysExpiry ?? 30;
+
+        var topBrands = await _unitOfWork.Brands.GetTopBrandsByRevenueAsync(actualTopCount);
+        var lowStock = await _unitOfWork.Products.GetLowStockProductsAsync(actualLowStock);
+        var expiringBatches = await _unitOfWork.ProductBatches.GetExpiringBatchesAsync(actualDaysExpiry);
+
+        var allBrands = await _unitOfWork.Brands.GetAllAsync();
+        var allTypes = await _unitOfWork.TypeOfProducts.GetAllAsync();
+
+        //Формування ViewModel
+        var model = new DashboardViewModel
         {
-            _unitOfWork = unitOfWork;
-        }
+            // ТОВАРИ
+            Products = productData.Items,
+            TotalProducts = productData.TotalCount,
+            ShowDeleted = filter.ShowDeleted,
+            CurrentPage = filter.Page,
+            CurrentSearch = filter.SearchString,
+            CurrentBrandId = filter.BrandId,
+            CurrentTypeId = filter.TypeId,
 
-        public async Task<IActionResult> Index(
-            string searchString, int? brandId, int? typeId, bool showDeleted, int page = 1,
-            string orderSearch = "", int? orderStatusId = null, int orderPage = 1,
-            string variantSearch = "", int variantPage = 1,
-            int? reportTopCount = null, int? reportLowStock = null, int? reportDaysExpiry = null,
-             string userSearch = "", int userPage = 1)
-        {
-            const int pageSize = 10;
+            // ЗАМОВЛЕННЯ
+            Orders = orderItems,
+            TotalOrders = orderTotal,
+            OrderSearch = filter.OrderSearch,
+            OrderCurrentPage = filter.OrderPage,
+            CurrentOrderStatusId = filter.OrderStatusId,
+            OrderTotalPages = (int)Math.Ceiling((double)orderTotal / pageSize),
+            OrderStatuses = await _unitOfWork.OrderStatuses.GetAllAsync(),
 
-            // дані для товарів та замовлень
-            var productData = await _unitOfWork.Products.GetFilteredAsync(page, pageSize, searchString, brandId, typeId, showDeleted);
-            var (orderItems, orderTotal) = await _unitOfWork.Orders.GetFilteredOrdersAsync(orderPage, pageSize, orderSearch, orderStatusId);
-            var (userItems, userTotal) = await _unitOfWork.Users.GetFilteredUsersAsync(userPage, pageSize, userSearch);
+            // ВАРІАНТИ
+            Variants = variantItems,
+            TotalVariants = variantTotal,
+            VariantSearch = filter.VariantSearch,
+            VariantCurrentPage = filter.VariantPage,
+            VariantTotalPages = (int)Math.Ceiling((double)variantTotal / pageSize),
 
-            // Отримання варіантів з пошуком 
-            var (variantItems, variantTotal) = await _unitOfWork.ProductVariants.GetFilteredVariantsAsync(variantPage, pageSize, variantSearch);
+            // АНАЛІТИКА
+            TopBrands = topBrands,
+            LowStockProducts = lowStock,
+            ExpiringBatches = expiringBatches,
+            ReportTopCount = actualTopCount,
+            ReportLowStockThreshold = actualLowStock,
+            ReportDaysUntilExpiry = actualDaysExpiry,
 
-            // Налаштування та отримання Звітів 
-            int actualTopCount = reportTopCount ?? 5;
-            int actualLowStock = reportLowStock ?? 10;
-            int actualDaysExpiry = reportDaysExpiry ?? 30;
+            // БРЕНДИ ТА ПАРТІЇ (використовуємо загальну сторінку з фільтра)
+            Brands = await _unitOfWork.Brands.GetPagedAsync(filter.Page, pageSize),
+            TotalBrands = await _unitOfWork.Brands.CountAsync(),
 
-            var topBrands = await _unitOfWork.Brands.GetTopBrandsByRevenueAsync(actualTopCount);
-            var lowStock = await _unitOfWork.Products.GetLowStockProductsAsync(actualLowStock);
-            var expiringBatches = await _unitOfWork.ProductBatches.GetExpiringBatchesAsync(actualDaysExpiry);
+            Batches = await _unitOfWork.ProductBatches.GetPagedAsync(filter.Page, pageSize),
+            TotalBatches = await _unitOfWork.ProductBatches.CountAsync(),
 
-            var allBrands = await _unitOfWork.Brands.GetAllAsync();
-            var allTypes = await _unitOfWork.TypeOfProducts.GetAllAsync();
+            // КОРИСТУВАЧІ
+            Users = userItems,
+            TotalUsers = userTotal,
+            UserSearch = filter.UserSearch,
 
-            var model = new DashboardViewModel
-            {
-                // ТОВАРИ
-                Products = productData.Items,
-                TotalProducts = productData.TotalCount,
-                ShowDeleted = showDeleted,
-                CurrentPage = page,
-                CurrentSearch = searchString,
-                CurrentBrandId = brandId,
-                CurrentTypeId = typeId,
+            // ВІДГУКИ
+            Reviews = await _unitOfWork.Reviews.GetPagedAsync(filter.Page, pageSize),
+            TotalReviews = await _unitOfWork.Reviews.CountAsync(),
 
-                //ЗАМОВЛЕННЯ
-                Orders = orderItems,
-                TotalOrders = orderTotal,
-                OrderSearch = orderSearch,
-                OrderCurrentPage = orderPage,
-                CurrentOrderStatusId = orderStatusId,
-                OrderTotalPages = (int)Math.Ceiling((double)orderTotal / pageSize),
-                OrderStatuses = await _unitOfWork.OrderStatuses.GetAllAsync(),
+            // ДАНІ БЕЗ ПАГІНАЦІЇ
+            Types = allTypes,
+            TotalTypes = allTypes.Count(),
+            Weights = await _unitOfWork.Weights.GetAllAsync(),
+            TotalWeights = await _unitOfWork.Weights.CountAsync(),
 
-                // ВАРІАНТИ
-                Variants = variantItems,
-                TotalVariants = variantTotal,
-                VariantSearch = variantSearch,
-                VariantCurrentPage = variantPage,
-                VariantTotalPages = (int)Math.Ceiling((double)variantTotal / pageSize),
+            // СПИСКИ ДЛЯ ДРОПДАУНІВ
+            BrandList = new SelectList(allBrands, "BrandId", "BrandName", filter.BrandId),
+            TypeList = new SelectList(allTypes, "TypeOfProductId", "TypeOfProductName", filter.TypeId),
 
-                // АНАЛІТИКА
-                TopBrands = topBrands,
-                LowStockProducts = lowStock,
-                ExpiringBatches = expiringBatches,
-                ReportTopCount = actualTopCount,
-                ReportLowStockThreshold = actualLowStock,
-                ReportDaysUntilExpiry = actualDaysExpiry,
+            PageSize = pageSize
+        };
 
-                // інщі вкладки з загальною сторінкою page
-                Brands = await _unitOfWork.Brands.GetPagedAsync(page, pageSize),
-                TotalBrands = await _unitOfWork.Brands.CountAsync(),
-
-                Batches = await _unitOfWork.ProductBatches.GetPagedAsync(page, pageSize),
-                TotalBatches = await _unitOfWork.ProductBatches.CountAsync(),
-
-                Users = userItems,
-                TotalUsers = userTotal,
-                UserSearch = userSearch,
-
-
-                Reviews = await _unitOfWork.Reviews.GetPagedAsync(page, pageSize),
-                TotalReviews = await _unitOfWork.Reviews.CountAsync(),
-
-                // ДАНІ БЕЗ ПАГІНАЦІЇ
-                Types = allTypes,
-                TotalTypes = allTypes.Count(),
-                Weights = await _unitOfWork.Weights.GetAllAsync(),
-                TotalWeights = await _unitOfWork.Weights.CountAsync(),
-
-                // СПИСКИ
-                BrandList = new SelectList(allBrands, "BrandId", "BrandName", brandId),
-                TypeList = new SelectList(allTypes, "TypeOfProductId", "TypeOfProductName", typeId),
-
-                PageSize = pageSize
-            };
-
-            return View(model);
-        }
+        return View(model);
     }
 }
