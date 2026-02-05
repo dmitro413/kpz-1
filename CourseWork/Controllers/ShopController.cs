@@ -21,7 +21,7 @@ namespace CourseWork.Controllers
 
             int pageSize = 12;
 
-            var (products, totalCount) = await ((ProductRepository)_unitOfWork.Products).GetShopProductsAsync(searchString, brandId, typeId, sortOrder, page, pageSize, minRating);
+            var (products, totalCount) = await _unitOfWork.Products.GetShopProductsAsync(searchString, brandId, typeId, sortOrder, page, pageSize, minRating); 
             if (minRating.HasValue)
             {
                 products = products.Where(p => p.AggregateRating >= minRating.Value);

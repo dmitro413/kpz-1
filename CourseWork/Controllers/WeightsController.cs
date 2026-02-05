@@ -1,4 +1,5 @@
-﻿using CourseWork.Data;
+﻿using CourseWork.Constants;
+using CourseWork.Data;
 using CourseWork.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CourseWork.Controllers
 {
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = UserRoles.AdminOrManager)]
     public class WeightsController : Controller
     {
         private readonly UnitOfWork _unitOfWork;
@@ -42,7 +43,7 @@ namespace CourseWork.Controllers
             }
             return View("~/Views/Home/FormWeight.cshtml", weight);
         }
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -50,7 +51,7 @@ namespace CourseWork.Controllers
             if (weight == null) return NotFound();
             return View("~/Views/Home/FormWeight.cshtml", weight);
         }
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Weight weight)
@@ -79,7 +80,7 @@ namespace CourseWork.Controllers
             }
             return View("~/Views/Home/FormWeight.cshtml", weight);
         }
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
