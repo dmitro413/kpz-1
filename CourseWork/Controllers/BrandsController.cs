@@ -1,6 +1,6 @@
 ﻿using CourseWork.Constants;
-using CourseWork.Data;
-using CourseWork.Models;
+using CourseWork.Core.Models;
+using CourseWork.Core.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

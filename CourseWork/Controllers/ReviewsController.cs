@@ -1,4 +1,4 @@
-﻿using CourseWork.Data;
+﻿using CourseWork.Core.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;

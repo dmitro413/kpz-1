@@ -1,6 +1,6 @@
 ﻿@using CourseWork.Extensions
-@using CourseWork.Models
-@model CourseWork.Models.Order
+@using CourseWork.Core.Models 
+@model CourseWork.Core.Models.Order
 @inject IHttpContextAccessor HttpContextAccessor
 
 @{
@@ -78,7 +78,7 @@
                 <p class="fs-5">Ви впевнені, що хочете оформити замовлення?</p>
                 <div class="alert alert-light border">
                     <p class="mb-1">Кількість товарів: <strong>@totalCount шт.</strong></p>
-                    <p class="mb-0 fs-4 fw-bold text-success">Сума: @totalPrice.ToString("N0") ₴</p>
+                    <p class="mb-0 fs-4 fw-bold text-success">Сума: @totalPrice.ToString("N0")₴</p>
                 </div>
                 <p class="text-muted small">Після підтвердження менеджер зв'яжеться з вами.</p>
             </div>

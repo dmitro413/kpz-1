@@ -1,8 +1,12 @@
 ﻿using CourseWork.Constants;
-using CourseWork.Data;
+using CourseWork.Core.Data;
+using CourseWork.Core.Models;
+using CourseWork.Core.Models;
 using CourseWork.Extensions;
-using CourseWork.Models;
+using CourseWork.Hubs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace CourseWork.Controllers
@@ -11,10 +15,12 @@ namespace CourseWork.Controllers
     {
         private readonly UnitOfWork _unitOfWork;
         private const string CartKey = SessionConstants.CartKey;
+        private readonly IHubContext<ShopHub> _hubContext;
 
-        public CheckoutController(UnitOfWork unitOfWork)
+        public CheckoutController(UnitOfWork unitOfWork, IHubContext<ShopHub> hubContext)
         {
             _unitOfWork = unitOfWork;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
@@ -150,6 +156,17 @@ namespace CourseWork.Controllers
             foreach (var item in cart)
             {
                 await _unitOfWork.ProductBatches.DecreaseStockAsync(item.VariantId, item.Quantity);
+                await _unitOfWork.SaveAsync();
+
+                int newStock = await _unitOfWork.ProductVariants.GetTotalStockAsync(item.VariantId);
+
+
+                await _hubContext.Clients.All.SendAsync(
+                    "ReceiveStockUpdate",
+                    item.ProductId,
+                    item.VariantId,
+                    newStock
+                );
 
                 var detail = new OrderDetail
                 {
@@ -161,6 +178,7 @@ namespace CourseWork.Controllers
                 await _unitOfWork.OrderDetails.AddAsync(detail);
             }
             await _unitOfWork.SaveAsync();
+            Console.WriteLine("Замовлення збережено");
         }
     }
 }

@@ -1,12 +1,12 @@
 ﻿using CourseWork.Constants;
-using CourseWork.Data;
-using CourseWork.Models;
-using CourseWork.Repositories; 
+using CourseWork.Core.Data;
+using CourseWork.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CourseWork.Services;
+using CourseWork.Core.Repositories;
 
 
 namespace CourseWork.Controllers

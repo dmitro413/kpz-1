@@ -1,0 +1,79 @@
+﻿@model CourseWork.Core.Models.Product
+
+@{
+    var minDate = DateOnly.FromDateTime(DateTime.Now.AddDays(7));
+}
+
+<div class="card h-100 product-card p-2 position-relative">
+    @if (Model.AggregateRating != 0)
+    {
+        var badgeClass = Model.AggregateRating > 0 ? "bg-success" : "bg-danger";
+        <div class="position-absolute top-0 end-0 m-2 px-2 py-1 @badgeClass text-white rounded small fw-bold shadow-sm" style="z-index: 10;">
+            <i class="bi @(Model.AggregateRating > 0 ? "bi-hand-thumbs-up-fill" : "bi-hand-thumbs-down-fill")"></i> @Model.AggregateRating
+        </div>
+    }
+
+    <a asp-controller="Shop" asp-action="Details" asp-route-id="@Model.ProductId" class="text-center mb-2 d-block">
+        <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/no-image.png" : Model.ImageUrl)"
+             class="img-fluid rounded" style="height: 160px; width: 100%; object-fit: contain;"
+             alt="@Model.Name" onerror="this.onerror=null; this.src='/images/no-image.png';">
+    </a>
+
+    <div class="card-body d-flex flex-column p-2">
+        <span class="category-badge">
+            <i class="bi bi-tag"></i> @(Model.TypeOfProduct?.TypeOfProductName ?? "Без категорії")
+        </span>
+        <small class="text-muted" style="font-size: 10px;" title="Калорійність на 100г">
+            <i class="bi bi-fire text-orange"></i> @Model.CaloriesPer100g ккал
+        </small>
+
+        <a asp-controller="Shop" asp-action="Details" asp-route-id="@Model.ProductId" class="product-name mb-2 fw-bold text-dark">
+            @Model.Name
+        </a>
+
+        <div class="mt-auto">
+            @if (Model.ProductVariants != null && Model.ProductVariants.Any())
+            {
+                var sortedV = Model.ProductVariants.OrderBy(v => v.Price).ToList();
+                var inStockV = sortedV.Where(v => v.ProductBatches.Any(b => b.ExpiryDate > minDate && b.Stock > 0)).ToList();
+
+                var displayV = inStockV.Any()
+                ? (ViewContext.HttpContext.Request.Query["sortOrder"] == "price_desc" ? inStockV.Last() : inStockV.First())
+                : sortedV.First();
+
+                bool isAvailable = inStockV.Contains(displayV);
+
+                <div class="mb-2">
+                    @if (sortedV.First().Price != sortedV.Last().Price)
+                    {
+                        <div class="price-range">@sortedV.First().Price.ToString("N0") - @sortedV.Last().Price.ToString("N0")₴</div>
+                    }
+                    <div class="price-tag" id="price-@Model.ProductId">
+                        @displayV.Price.ToString("N0") ₴
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-1 variant-container mb-3">
+                    @foreach (var v in sortedV)
+                    {
+                        bool hasStock = v.ProductBatches.Any(b => b.ExpiryDate > minDate && b.Stock > 0);
+                        <button class="btn btn-sm @(v == displayV ? "btn-success" : "btn-outline-secondary") @(hasStock ? "" : "opacity-50") py-0 px-1"
+                                style="font-size:10px;"
+                                onclick="updateCardState('price-@Model.ProductId','status-@Model.ProductId','@v.Price.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)',@(hasStock.ToString().ToLower()),this)">
+                            @v.Weight?.WeightValue @v.Weight?.Unit
+                        </button>
+                    }
+                </div>
+
+                <div class="d-flex justify-content-between align-items-end border-top pt-2" id="status-container-@Model.ProductId">
+                    <small class="fw-bold @(isAvailable ? "text-success" : "text-muted")">
+                        @(isAvailable ? "В наявності" : "Закінчився")
+                    </small>
+                    <a asp-controller="Shop" asp-action="Details" asp-route-id="@Model.ProductId" class="btn btn-outline-success btn-cart rounded-circle p-2 border-0 bg-light">
+                        <i class="bi bi-cart3 fs-5"></i>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,128 @@
+﻿@page "/products-manager"
+@using CourseWork.Core.Models
+@using System.Net.Http.Headers
+@using Microsoft.AspNetCore.SignalR.Client
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject IJSRuntime JS
+@inject HubConnection HubConnection
+
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>🛍️ Керування товарами</h3>
+    </div>
+
+    @if (errorMessage != null)
+    {
+        <div class="alert alert-danger">@errorMessage <a href="/login">Увійти</a></div>
+    }
+    else if (products == null)
+    {
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Завантаження...</span>
+        </div>
+    }
+    else
+    {
+        <a href="/product/create" class="btn btn-success">
+            <i class="bi bi-plus-lg"></i> Додати товар
+        </a>
+        <table class="table table-hover shadow-sm align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Назва</th>
+                    <th>Калорії</th>
+                    <th>Дії</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in products)
+                {
+                    <tr>
+                        <td>
+                            <strong>@p.Name</strong><br />
+                            <small class="text-muted">@p.Description</small>
+                        </td>
+                        <td>@p.CaloriesPer100g</td>
+                        <td>
+                            <a href="/product/edit/@p.ProductId" class="btn btn-warning btn-sm me-2">
+                                ✏️
+                            </a>
+                            <button class="btn btn-danger btn-sm" @onclick="() => Delete(p.ProductId, p.Name)">
+                                🗑️
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private List<Product>? products;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        var token = await LocalStorage.GetItemAsync<string>("token");
+        if (string.IsNullOrEmpty(token))
+        {
+            errorMessage = "Ви не авторизовані.";
+            return;
+        }
+
+        var request = new HttpRequestMessage(HttpMethod.Get, "api/products");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        var response = await Http.SendAsync(request);
+        if (response.IsSuccessStatusCode)
+        {
+            products = await response.Content.ReadFromJsonAsync<List<Product>>();
+        }
+    }
+
+    private async Task Delete(int id, string name)
+    {
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Ви дійсно хочете видалити товар '{name}'?");
+        if (!confirmed) return;
+
+        try
+        {
+            var token = await LocalStorage.GetItemAsync<string>("token");
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"api/products/{id}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await Http.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                if (HubConnection.State == HubConnectionState.Disconnected)
+                {
+                    await HubConnection.StartAsync();
+                }
+
+                if (HubConnection.State == HubConnectionState.Connected)
+                {
+                    await HubConnection.InvokeAsync("UpdateProductStock", id, 0, 0);
+                }
+
+                await LoadData();
+            }
+            else
+            {
+                errorMessage = "Помилка при видаленні товару.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Сталася помилка: {ex.Message}";
+        }
+    }
+}

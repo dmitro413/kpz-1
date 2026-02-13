@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "CourseWork\\CourseWork.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "CourseWork.Blazor\\CourseWork.Blazor.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

@@ -1,0 +1,48 @@
+﻿@page "/login"
+@using CourseWork.Core.Models
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject NavigationManager Nav
+
+<div class="container mt-5">
+    <div class="col-md-4 mx-auto card p-4 shadow">
+        <h3 class="text-center">Вхід до API</h3>
+        <div class="mb-3">
+            <label>Email</label>
+            <input @bind="email" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label>Пароль</label>
+            <input @bind="password" type="password" class="form-control" />
+        </div>
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger">@error</div>
+        }
+        <button class="btn btn-primary w-100" @onclick="HandleLogin">Увійти</button>
+    </div>
+</div>
+
+@code {
+    private string email = "";
+    private string password = "";
+    private string? error;
+
+    async Task HandleLogin()
+    {
+        var model = new { Email = email, Password = password };
+        var response = await Http.PostAsJsonAsync("api/auth/login", model);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+            await LocalStorage.SetItemAsync("token", result.Token); 
+            Nav.NavigateTo("/admin-products");
+        }
+        else
+        {
+            error = "Помилка входу!";
+        }
+    }
+    class LoginResponse { public string Token { get; set; } }
+}

@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using CourseWork.Data;
-using CourseWork.Models;
+using CourseWork.Core.Data;
 using CourseWork.Constants;
+using CourseWork.Core.Models;
 
 namespace CourseWork.Controllers
 {

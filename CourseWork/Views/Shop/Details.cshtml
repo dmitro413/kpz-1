@@ -1,4 +1,4 @@
-﻿@model CourseWork.Models.Product
+﻿@model CourseWork.Core.Models.Product
 @using System.Security.Claims
 
 @{
@@ -266,6 +266,8 @@
 
 @section Scripts {
     <script>
+        let currentVariantId = parseInt(document.getElementById('selectedVariantId').value);
+
         function updateVariantInfo(priceRaw, stock, variantId, btn) {
             const price = parseFloat(priceRaw);
             const priceEl = document.getElementById('displayPrice');
@@ -276,17 +278,17 @@
 
             if (stock > 0) {
                 statusContainer.innerHTML = `
-                                    <span class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Є в наявності</span>
-                                    <span class="text-muted ms-2 small">(Залишок: ${stock} шт.)</span>
-                                `;
+                    <span class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Є в наявності</span>
+                    <span class="text-muted ms-2 small">(Залишок: ${stock} шт.)</span>
+                `;
                 buyBtn.removeAttribute('disabled');
                 buyBtn.innerHTML = '<i class="bi bi-cart3 me-2"></i> Додати в кошик';
                 buyBtn.classList.remove('btn-secondary');
                 buyBtn.classList.add('btn-primary');
             } else {
                 statusContainer.innerHTML = `
-                                    <span class="text-danger fw-bold"><i class="bi bi-x-circle-fill"></i> Закінчився</span>
-                                `;
+                    <span class="text-danger fw-bold"><i class="bi bi-x-circle-fill"></i> Закінчився</span>
+                `;
                 buyBtn.setAttribute('disabled', 'disabled');
                 buyBtn.innerHTML = 'Немає в наявності';
                 buyBtn.classList.remove('btn-primary');
@@ -302,14 +304,41 @@
             btn.classList.add('btn-success', 'active');
 
             document.getElementById('selectedVariantId').value = variantId;
+            currentVariantId = variantId;
         }
+
+        connection.on("ReceiveStockUpdate", function (productId, variantId, newStock) {
+            if (productId === @Model.ProductId && variantId === currentVariantId) {
+
+                const statusContainer = document.getElementById('stock-status-container');
+                const buyBtn = document.getElementById('addToCartBtn');
+
+                if (newStock > 0) {
+                    statusContainer.innerHTML = `
+                        <span class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Є в наявності</span>
+                        <span class="text-muted ms-2 small">(Залишок: ${newStock} шт.)</span>
+                    `;
+                    buyBtn.disabled = false;
+                    buyBtn.innerHTML = '<i class="bi bi-cart3 me-2"></i> Додати в кошик';
+                    buyBtn.classList.remove('btn-secondary');
+                    buyBtn.classList.add('btn-primary');
+                } else {
+                    statusContainer.innerHTML = `
+                        <span class="text-danger fw-bold"><i class="bi bi-x-circle-fill"></i> Закінчився</span>
+                    `;
+                    buyBtn.disabled = true;
+                    buyBtn.innerHTML = 'Немає в наявності';
+                    buyBtn.classList.remove('btn-primary');
+                    buyBtn.classList.add('btn-secondary');
+                }
+            }
+        });
 
         const deleteReviewModal = document.getElementById('deleteReviewModal');
         if (deleteReviewModal) {
             deleteReviewModal.addEventListener('show.bs.modal', function (event) {
                 const button = event.relatedTarget;
                 const reviewId = button.getAttribute('data-review-id');
-
                 const form = document.getElementById('deleteReviewForm');
                 form.action = '/Reviews/Delete/' + reviewId;
             });

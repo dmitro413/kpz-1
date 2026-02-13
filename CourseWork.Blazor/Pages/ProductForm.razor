@@ -1,0 +1,111 @@
+﻿@page "/product/create"
+@page "/product/edit/{Id:int}"
+
+@using CourseWork.Core.Models
+@using System.Net.Http.Headers
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject NavigationManager Nav
+
+<div class="container mt-4">
+    <div class="card shadow p-4 col-md-8 mx-auto">
+        <h3 class="mb-3">@(Id == null ? "Створення товару" : "Редагування товару")</h3>
+
+        <EditForm Model="product" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            <div class="mb-3">
+                <label class="form-label">Назва</label>
+                <InputText @bind-Value="product.Name" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Опис</label>
+                <InputTextArea @bind-Value="product.Description" class="form-control" />
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Бренд (ID)</label>
+                    <InputNumber @bind-Value="product.BrandId" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Категорія (ID)</label>
+                    <InputNumber @bind-Value="product.TypeOfProductId" class="form-control" />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Калорії / 100г</label>
+                <InputNumber @bind-Value="product.CaloriesPer100g" class="form-control" />
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="/admin-products" class="btn btn-secondary">Скасувати</a>
+                <button type="submit" class="btn btn-primary">
+                    @(Id == null ? "Створити" : "Зберегти зміни")
+                </button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    private Product product = new Product { BrandId = 1, TypeOfProductId = 1 };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != null)
+        {
+            var token = await LocalStorage.GetItemAsync<string>("token");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"api/products/{Id}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await Http.SendAsync(request);
+            if (response.IsSuccessStatusCode)
+            {
+                product = await response.Content.ReadFromJsonAsync<Product>();
+            }
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        var token = await LocalStorage.GetItemAsync<string>("token");
+
+        var dto = new CreateProductDto
+        {
+            Name = product.Name,
+            Description = product.Description,
+            BrandId = product.BrandId,
+            TypeOfProductId = product.TypeOfProductId,
+            CaloriesPer100g = product.CaloriesPer100g
+        };
+
+        HttpResponseMessage response;
+
+        if (Id == null)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/products");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Content = JsonContent.Create(dto);
+            response = await Http.SendAsync(request);
+        }
+        else
+        {
+            var request = new HttpRequestMessage(HttpMethod.Put, $"api/products/{Id}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Content = JsonContent.Create(dto);
+            response = await Http.SendAsync(request);
+        }
+
+        if (response.IsSuccessStatusCode)
+        {
+            Nav.NavigateTo("/admin-products");
+        }
+    }
+}

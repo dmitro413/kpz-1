@@ -1,0 +1,47 @@
+﻿@using CourseWork.Core.Models
+@model IEnumerable<TypeOfProduct>
+
+<div class="category-menu-container mb-4 mt-2">
+    <div class="d-flex flex-wrap justify-content-center gap-2">
+        <a asp-controller="Shop" asp-action="Index" asp-route-typeId=""
+           class="btn rounded-pill px-4 @(ViewBag.CurrentType == null ? "btn-active-sweet" : "btn-outline-sweet")">
+            Всі солодощі
+        </a>
+
+        @foreach (var t in Model)
+        {
+            <a asp-controller="Shop" asp-action="Index" asp-route-typeId="@t.TypeOfProductId"
+               class="btn rounded-pill px-4 @(ViewBag.CurrentType == t.TypeOfProductId ? "btn-active-sweet" : "btn-outline-sweet")">
+                @t.TypeOfProductName
+            </a>
+        }
+    </div>
+</div>
+
+<style>
+    .btn-active-sweet {
+        background-color: #00a046;
+        color: white;
+        border: 1px solid #00a046;
+    }
+
+        .btn-active-sweet:hover {
+            background-color: #008a3d;
+            color: white;
+        }
+
+    .btn-outline-sweet {
+        color: #00a046;
+        border: 1px solid #00a046;
+        background-color: transparent;
+    }
+
+        .btn-outline-sweet:hover {
+            background-color: #00a046;
+            color: white;
+        }
+
+    .category-menu-container {
+        padding-top: 5px;
+    }
+</style>

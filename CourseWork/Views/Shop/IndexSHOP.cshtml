@@ -1,4 +1,4 @@
-﻿@model IEnumerable<CourseWork.Models.Product>
+﻿@model IEnumerable<CourseWork.Core.Models.Product>
 @{
     ViewData["Title"] = "Каталог товарів";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -86,6 +86,11 @@
             <button type="submit" class="btn btn-primary w-100"><i class="bi bi-filter"></i></button>
         </div>
     </form>
+    <div class="row">
+        <div class="col-12 text-center">
+            @await Component.InvokeAsync("NavigationMenu")
+        </div>
+    </div>
 </div>
 
 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
@@ -94,79 +99,7 @@
         @foreach (var p in Model)
         {
             <div class="col">
-                <div class="card h-100 product-card p-2 position-relative">
-                    @if (p.AggregateRating != 0)
-                    {
-                        var badgeClass = p.AggregateRating > 0 ? "bg-success" : "bg-danger";
-                        <div class="position-absolute top-0 end-0 m-2 px-2 py-1 @badgeClass text-white rounded small fw-bold shadow-sm" style="z-index: 10;">
-                            <i class="bi @(p.AggregateRating > 0 ? "bi-hand-thumbs-up-fill" : "bi-hand-thumbs-down-fill")"></i> @p.AggregateRating
-                        </div>
-                    }
-
-                    <a asp-controller="Shop" asp-action="Details" asp-route-id="@p.ProductId" class="text-center mb-2 d-block">
-                        <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "/images/no-image.png" : p.ImageUrl)"
-                             class="img-fluid rounded" style="height: 160px; width: 100%; object-fit: contain;"
-                             alt="@p.Name" onerror="this.onerror=null; this.src='/images/no-image.png';">
-                    </a>
-
-                    <div class="card-body d-flex flex-column p-2">
-                        <span class="category-badge">
-                            <i class="bi bi-tag"></i> @(p.TypeOfProduct?.TypeOfProductName ?? "Без категорії")
-                        </span>
-                        <small class="text-muted" style="font-size: 10px;" title="Калорійність на 100г">
-                            <i class="bi bi-fire text-orange"></i> @p.CaloriesPer100g ккал
-                        </small>
-
-                        <a asp-controller="Shop" asp-action="Details" asp-route-id="@p.ProductId" class="product-name mb-2 fw-bold text-dark">
-                            @p.Name
-                        </a>
-
-                        <div class="mt-auto">
-                            @if (p.ProductVariants != null && p.ProductVariants.Any())
-                            {
-                                var sortedV = p.ProductVariants.OrderBy(v => v.Price).ToList();
-                                var inStockV = sortedV.Where(v => v.ProductBatches.Any(b => b.ExpiryDate > minDate && b.Stock > 0)).ToList();
-
-                                var displayV = inStockV.Any()
-                                ? (ViewBag.CurrentSort == "price_desc" ? inStockV.Last() : inStockV.First())
-                                : sortedV.First();
-
-                                bool isAvailable = inStockV.Contains(displayV);
-
-                                <div class="mb-2">
-                                    @if (sortedV.First().Price != sortedV.Last().Price)
-                                    {
-                                        <div class="price-range">@sortedV.First().Price.ToString("N0") - @sortedV.Last().Price.ToString("N0") ₴</div>
-                                    }
-                                    <div class="price-tag" id="price-@p.ProductId">
-                                        @displayV.Price.ToString("N0") ₴
-                                    </div>
-                                </div>
-
-                                <div class="d-flex flex-wrap gap-1 variant-container mb-3">
-                                    @foreach (var v in sortedV)
-                                    {
-                                        bool hasStock = v.ProductBatches.Any(b => b.ExpiryDate > minDate && b.Stock > 0);
-                                        <button class="btn btn-sm @(v == displayV ? "btn-success" : "btn-outline-secondary") @(hasStock ? "" : "opacity-50") py-0 px-1"
-                                                style="font-size:10px;"
-                                                onclick="updateCardState('price-@p.ProductId','status-@p.ProductId','@v.Price.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)',@(hasStock.ToString().ToLower()),this)">
-                                            @v.Weight?.WeightValue @v.Weight?.Unit
-                                        </button>
-                                    }
-                                </div>
-
-                                <div class="d-flex justify-content-between align-items-end border-top pt-2">
-                                    <small class="fw-bold @(isAvailable ? "text-success" : "text-muted")" id="status-@p.ProductId">
-                                        @(isAvailable ? "В наявності" : "Закінчився")
-                                    </small>
-                                    <a asp-controller="Shop" asp-action="Details" asp-route-id="@p.ProductId" class="btn btn-outline-success btn-cart rounded-circle p-2 border-0 bg-light">
-                                        <i class="bi bi-cart3 fs-5"></i>
-                                    </a>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                </div>
+                <partial name="_ProductSummary" model="p" />
             </div>
         }
     }
@@ -217,6 +150,31 @@
             </li>
         </ul>
     </nav>
+}
+@section Scripts {
+    <script>
+        connection.on("ReceiveStockUpdate", function (productId, variantId, newStock) {
+
+            const statusContainer = document.getElementById(`status-container-${productId}`);
+            if (statusContainer) {
+                let newHtml;
+                if (newStock > 0) {
+                    newHtml = `
+                        <small class="fw-bold text-success">В наявності (${newStock} шт.)</small>
+                        <a href="/Shop/Details/${productId}" class="btn btn-outline-success btn-cart rounded-circle p-2 border-0 bg-light">
+                            <i class="bi bi-cart3 fs-5"></i>
+                        </a>`;
+                } else {
+                    newHtml = `
+                        <small class="fw-bold text-muted">Закінчився</small>
+                        <a href="/Shop/Details/${productId}" class="btn btn-outline-secondary btn-cart rounded-circle p-2 border-0 bg-light">
+                            <i class="bi bi-cart3 fs-5"></i>
+                        </a>`;
+                }
+                statusContainer.innerHTML = newHtml;
+            }
+        });
+    </script>
 }
 
 

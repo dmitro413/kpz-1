@@ -1,9 +1,11 @@
 ﻿using CourseWork.Constants;
-using CourseWork.Data;
-using CourseWork.Models;
+using CourseWork.Core.Data;
+using CourseWork.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using CourseWork.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace CourseWork.Controllers
 {
@@ -11,10 +13,12 @@ namespace CourseWork.Controllers
     public class BatchesController : Controller
     {
         private readonly UnitOfWork _unitOfWork;
+        private readonly IHubContext<ShopHub> _hubContext;
 
-        public BatchesController(UnitOfWork unitOfWork)
+        public BatchesController(UnitOfWork unitOfWork, IHubContext<ShopHub> hubContext)
         {
             _unitOfWork = unitOfWork;
+            _hubContext = hubContext;
         }
         [HttpGet]
         public async Task<IActionResult> Create()
@@ -100,8 +104,15 @@ namespace CourseWork.Controllers
             var batch = await _unitOfWork.ProductBatches.GetByIdAsync(id);
             if (batch != null)
             {
+                int variantId = batch.VariantId;
+                var variant = await _unitOfWork.ProductVariants.GetByIdAsync(variantId);
+                int productId = variant?.ProductId ?? 0;
+
                 _unitOfWork.ProductBatches.Remove(batch);
                 await _unitOfWork.SaveAsync();
+                int newStock = await _unitOfWork.ProductVariants.GetTotalStockAsync(variantId);
+                await _hubContext.Clients.All.SendAsync("ReceiveStockUpdate", productId, variantId, newStock);
+
                 TempData["Success"] = "Партію видалено.";
             }
             return RedirectToAction("Index", "Home");

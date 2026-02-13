@@ -1,5 +1,5 @@
 ﻿using CourseWork.Constants;
-using CourseWork.Data;
+using CourseWork.Core.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,7 +1,7 @@
 ﻿using CourseWork.Constants;
-using CourseWork.Data;
+using CourseWork.Core.Models;
+using CourseWork.Core.Data;
 using CourseWork.Extensions;
-using CourseWork.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CourseWork.Controllers

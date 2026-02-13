@@ -1,5 +1,6 @@
-using CourseWork.Data;
-using CourseWork.Models;
+using CourseWork.Core.Models;
+using CourseWork.Core.Data;
+using CourseWork.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;

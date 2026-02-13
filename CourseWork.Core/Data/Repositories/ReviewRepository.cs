@@ -1,0 +1,31 @@
+﻿using CourseWork.Core.Models;
+using CourseWork.Core.Data;
+using Microsoft.EntityFrameworkCore;
+
+namespace CourseWork.Core.Repositories
+{
+    public class ReviewRepository : Repository<Review>
+    {
+        public ReviewRepository(MyDbContext context) : base(context) { }
+
+        public async Task<IEnumerable<Review>> GetPagedAsync(int page, int pageSize)
+        {
+            return await _dbSet
+                .Include(r => r.User)
+                .Include(r => r.Product)
+                .Where(r => !r.Product.IsDeleted) 
+                .OrderByDescending(r => r.CreatedAt) 
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+        public async Task<List<Review>> GetByUserIdAsync(int userId)
+        {
+            return await _dbSet.Where(r => r.UserId == userId).ToListAsync();
+        }
+        public async Task<List<Review>> GetByProductIdAsync(int productId)
+        {
+            return await _dbSet.IgnoreQueryFilters().Where(r => r.ProductId == productId).ToListAsync();
+        }
+    }
+}

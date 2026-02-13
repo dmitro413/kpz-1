@@ -1,0 +1,30 @@
+﻿@inherits LayoutComponentBase
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject NavigationManager Nav
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <button class="btn btn-link text-danger text-decoration-none fw-bold" @onclick="Logout">
+                Вихід <span class="oi oi-account-logout" aria-hidden="true"></span>
+            </button>
+
+            <a href="https://docs.microsoft.com/aspnet/" target="_blank" class="ms-3">About</a>
+        </div>
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+    private async Task Logout()
+    {
+        await LocalStorage.RemoveItemAsync("token");
+        Nav.NavigateTo("/login");
+    }
+}

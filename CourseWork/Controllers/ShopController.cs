@@ -1,6 +1,6 @@
-﻿using CourseWork.Data;
-using CourseWork.Models;
-using CourseWork.Repositories;
+﻿using CourseWork.Core.Data;
+using CourseWork.Core.Models;
+using CourseWork.Core.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;

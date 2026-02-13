@@ -1,10 +1,10 @@
 ﻿using System.Security.Claims;
-using CourseWork.Data;
-using CourseWork.Models;
+using CourseWork.Core.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using CourseWork.Core.Models;
 
 namespace CourseWork.Controllers
 {
